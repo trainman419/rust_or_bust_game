@@ -16,7 +16,6 @@ pub trait Actor {
 }
 
 pub trait Sprited {
-  fn set_sprite_id(&mut self, new_id: uuid::Uuid);
   fn get_sprite_id(&self) -> uuid::Uuid;
 }
 

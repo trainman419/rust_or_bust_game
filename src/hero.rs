@@ -10,12 +10,14 @@ use self::ai_behavior::{
     While,
 };
 
+use std::cell::RefCell;
 use std::rc::Rc;
 use std::collections::HashMap;
 
 use entity;
 
 type Texture = piston_window::G2dTexture;
+type SceneRef = Rc<RefCell<sprite::Scene<Texture>>>;
 
 
 const DEFAULT_SCALE: f64 = 1.0;
@@ -25,19 +27,20 @@ pub struct Hero<'a> {
     pos_x: f64,
     pos_y: f64,
     sprite_id: uuid::Uuid,
-    scene: &'a mut sprite::Scene<Texture>,
+    scene: &'a mut SceneRef,
 }
 
 
 impl<'a> Hero<'a> {
-  pub fn new(assets: &HashMap<String, Rc<Texture>>, scene: &'a mut sprite::Scene<Texture>) -> Hero<'a> {
+  pub fn new(assets: &HashMap<String, Rc<Texture>>,
+             scene: &'a mut SceneRef) -> Hero<'a> {
     let hero_sprite = assets.get(&String::from("characters/detective/Detective")).unwrap().clone();
     let mut hero_sprite = sprite::Sprite::from_texture(hero_sprite);
 
     //hero_sprite.set_position(600.0, 775.0);
     hero_sprite.set_scale(DEFAULT_SCALE, DEFAULT_SCALE);
 
-    let hero_id: uuid::Uuid = scene.add_child(hero_sprite);
+    let hero_id: uuid::Uuid = scene.borrow_mut().add_child(hero_sprite);
 
     let seq = Sequence(vec![
         While(Box::new(WaitForever), vec![
@@ -45,7 +48,7 @@ impl<'a> Hero<'a> {
               Action(sprite::Ease(sprite::EaseFunction::ExponentialIn, Box::new(sprite::MoveBy(3.0, 0.0, -50.0)))),
         ]),
         ]);
-    scene.run(hero_id, &seq);
+    scene.borrow_mut().run(hero_id, &seq);
 
     let hero = Hero {
         pos_x: 0.0,
@@ -92,20 +95,28 @@ impl<'a> entity::Position for Hero<'a> {
 impl<'a> entity::Scaled for Hero<'a> {
 
   fn set_scale(&mut self, new_scale: f64) {
-    self.scene.child_mut(self.sprite_id).set_scale(new_scale);
+    match self.scene.borrow_mut().child_mut(self.sprite_id) {
+      Some(sprite) => {
+        sprite.set_scale(new_scale, new_scale);
+      },
+      None => { }
+    }
   }
 
   fn get_scale(&self) -> f64 {
-    self.scene.child(self.sprite_id).get_scale();
+    match self.scene.borrow_mut().child(self.sprite_id) {
+      Some(sprite) => {
+        sprite.get_scale().0
+      },
+      None => {
+        0.0
+      }
+    }
   }
 }
 
 
 impl<'a> entity::Sprited for Hero<'a> {
-  fn set_sprite_id(&mut self, new_id: uuid::Uuid) {
-    self.sprite_id = new_id;
-  }
-
   fn get_sprite_id(&self) -> uuid::Uuid {
     self.sprite_id
   }

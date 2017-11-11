@@ -372,7 +372,7 @@ where
 
     // Build the default hero
     let hero_scale = 10.0;
-    let mut hero = hero::Hero::new(&assets, &mut scene);
+    let mut hero = hero::Hero::new(&assets, &mut Rc::new(RefCell::new(scene)));
     hero.set_position(600.0, 775.0);
     hero.set_scale(hero_scale);
 
