@@ -22,7 +22,7 @@ git clone git@github.com:trainman419/rust_or_bust_game.git
 
 ```
 mkdir -p ~/.cargo ~/forks
-git clone git@github.com:PistonDevelopers/piston.git ~/forks/piston
+git clone git@github.com:chpatton013/piston.git ~/forks/piston
 (cd ~/forks/piston && cargo build)
 echo 'paths = ["forks/piston"]' > ~/.cargo/config
 ```
