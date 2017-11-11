@@ -1,0 +1,20 @@
+{
+  "window": {
+    "title": "Rust Or Bust",
+    "size": {
+      "width": 1600,
+      "height": 1000
+    },
+    "samples": 0,
+    "fullscreen": false,
+    "vsync": false,
+    "srgb": false,
+    "resizable": false,
+    "decorated": false
+  },
+  "event": {
+    "max_fps": 60,
+    "ups": 120,
+    "ups_reset": 2
+  }
+}
