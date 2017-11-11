@@ -5,12 +5,20 @@ extern crate piston_window;
 extern crate find_folder;
 extern crate sprite;
 extern crate tiled;
+extern crate ai_behavior;
 
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::collections::HashMap;
 
 use std::path::Path;
+
+use self::ai_behavior::{
+    Action,
+    Sequence,
+    While,
+    WaitForever,
+};
 
 use error;
 use handler;
@@ -346,6 +354,7 @@ where Window: piston_window::OpenGLWindow,
     &mut self,
     _event: &Event,
   ) -> error::Result<()> {
+    self.scene.event(_event);
     Ok(())
   }
 }
@@ -365,7 +374,16 @@ where
     let mut ferris = sprite::Sprite::from_texture(ferris);
 
     ferris.set_position(600.0, 400.0);
-    scene.add_child(ferris);
+    let ferris_id = scene.add_child(ferris);
+
+    let seq = Sequence(vec![
+        While(Box::new(WaitForever), vec![
+              Action(sprite::Ease(sprite::EaseFunction::ExponentialIn, Box::new(sprite::MoveBy(3.0, 0.0, 50.0)))),
+              Action(sprite::Ease(sprite::EaseFunction::ExponentialIn, Box::new(sprite::MoveBy(3.0, 0.0, -50.0)))),
+        ]),
+        ]);
+
+    scene.run(ferris_id, &seq);
 
     GameMode::new_with_state(window, State::new(), assets, scene)
   }
