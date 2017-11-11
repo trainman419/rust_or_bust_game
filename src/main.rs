@@ -22,9 +22,12 @@ extern crate serde_json;
 
 mod application;
 mod config;
+mod detective;
 mod entity;
 mod error;
 mod handler;
+mod hero;
+mod item;
 mod rust_rider;
 
 use std::cell::RefCell;

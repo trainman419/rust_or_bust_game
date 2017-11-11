@@ -5,7 +5,6 @@ extern crate piston_window;
 extern crate find_folder;
 extern crate sprite;
 extern crate tiled;
-extern crate ai_behavior;
 
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -13,15 +12,13 @@ use std::collections::HashMap;
 
 use std::path::Path;
 
-use self::ai_behavior::{
-    Action,
-    Sequence,
-    While,
-    WaitForever,
-};
-
+use entity;
+use entity::Position;
+use entity::Scaled;
+use entity::Sprited;
 use error;
 use handler;
+use hero;
 
 enum EditMode {
   Insert,
@@ -114,6 +111,7 @@ pub struct State {
   active_line_segment: Option<Point>,
   active_selection: Option<Point>,
   mouse_position: Point,
+  entities: entity::EntityMap,
 }
 
 impl State {
@@ -125,6 +123,7 @@ impl State {
       active_line_segment: None,
       active_selection: None,
       mouse_position: Point::new(0.0, 0.0),
+      entities: entity::EntityMap::new(),
     }
   }
 }
@@ -369,27 +368,18 @@ where
   ) -> GameMode<Window> {
     let assets = load_assets(&mut window.borrow_mut());
     let mut scene = Scene::new();
+    let mut state = State::new();
 
-    let hero = assets.get(&String::from("characters/detective/Detective")).unwrap().clone();
-    let mut hero = sprite::Sprite::from_texture(hero);
-
+    // Build the default hero
     let hero_scale = 10.0;
+    let mut hero = hero::Hero::new(&assets, &mut scene);
     hero.set_position(600.0, 775.0);
-    hero.set_scale(hero_scale, hero_scale);
+    hero.set_scale(hero_scale);
 
-    let hero_id = scene.add_child(hero);
+    let hero_id = hero.get_sprite_id();
+    state.entities.insert(String::from("hero"), Rc::new(hero));
 
-    let seq = Sequence(vec![
-        While(Box::new(WaitForever), vec![
-              Action(sprite::Ease(sprite::EaseFunction::ExponentialIn, Box::new(sprite::MoveBy(3.0, 0.0, 50.0)))),
-              Action(sprite::Ease(sprite::EaseFunction::ExponentialIn, Box::new(sprite::MoveBy(3.0, 0.0, -50.0)))),
-        ]),
-        ]);
-
-    scene.run(hero_id, &seq);
-
-
-    GameMode::new_with_state(window, State::new(), assets, scene)
+    GameMode::new_with_state(window, state, assets, scene)
   }
 
   /// Create a GameMode with an existing State.
