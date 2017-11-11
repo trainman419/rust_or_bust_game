@@ -6,7 +6,8 @@
 
 ```
 sh <(curl --fail --silent --show-error --location https://sh.rustup.rs) --no-modify-path -y
-[ -f ~/.cargo/bin/rustfmt ] || cargo install rustfmt
+. ~/.cargo/env
+cargo install rustfmt
 rustup install nightly
 rustup default nightly
 ```
