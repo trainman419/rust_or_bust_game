@@ -4,6 +4,7 @@ extern crate piston;
 extern crate piston_window;
 extern crate find_folder;
 extern crate sprite;
+extern crate tiled;
 
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -308,13 +309,13 @@ where Window: piston_window::Window
         match path.extension().unwrap().to_str().unwrap() {
             "png" => {
                 println!("Loading {}", name);
-        assets.insert(name,
-                Rc::new(piston_window::Texture::from_path(
-                        &mut window.factory,
-                        path,
-                        piston_window::Flip::None,
-                        &piston_window::TextureSettings::new()
-                        ).unwrap()));
+                let texture = Rc::new(piston_window::Texture::from_path(
+                                      &mut window.factory,
+                                      path,
+                                      piston_window::Flip::None,
+                                      &piston_window::TextureSettings::new()
+                                      ).unwrap());
+                assets.insert(name, texture);
             }
             _ => (),
         }
