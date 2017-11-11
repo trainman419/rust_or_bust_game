@@ -6,11 +6,14 @@ extern crate find_folder;
 extern crate sprite;
 extern crate tiled;
 extern crate ai_behavior;
+extern crate gif;
+extern crate gif_dispose;
 
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::collections::HashMap;
 
+use std::fs::File;
 use std::path::Path;
 
 use self::ai_behavior::{
@@ -365,6 +368,30 @@ where Window: piston_window::Window
                                       ).unwrap());
                 assets.insert(name, texture);
             }
+            "gif" => {
+                use self::gif::Decoder;
+                use self::gif::SetParameter;
+                use self::gif_dispose::Screen;
+                println!("Loading {}", name);
+                let mut decoder = Decoder::new(File::open(path).unwrap());
+                decoder.set(gif::ColorOutput::Indexed);
+                let mut decoder = decoder.read_info().unwrap();
+                let mut i = 0;
+
+                let mut screen = Screen::new_reader(&decoder);
+                while let Some(frame) = decoder.read_next_frame().unwrap() {
+                    let frame_name = format!("{}{}", &name, &i);
+                    screen.blit_frame(&frame);
+
+                    let texture = Rc::new(piston_window::Texture::from_image(
+                                          &mut window.factory,
+                                          screen.pixels, // TODO(austin): nobody wants to own this :/
+                                          &piston_window::TextureSettings::new().mag(piston_window::Filter::Nearest),
+                                          ).unwrap());
+                    assets.insert(frame_name, texture);
+                    //i++;
+                }
+            }
             _ => (),
         }
       }
@@ -421,7 +448,7 @@ where
     let assets = load_assets(&mut window.borrow_mut());
     let mut scene = Scene::new();
 
-    let hero = assets.get(&String::from("characters/detective/Detective")).unwrap().clone();
+    let hero = assets.get(&String::from("characters/detective/Detective_idle")).expect("Could not find asset").clone();
     let mut hero = sprite::Sprite::from_texture(hero);
 
     let hero_scale = 10.0;
