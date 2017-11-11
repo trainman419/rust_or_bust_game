@@ -321,7 +321,7 @@ where Window: piston_window::Window
                                       &mut window.factory,
                                       path,
                                       piston_window::Flip::None,
-                                      &piston_window::TextureSettings::new()
+                                      &piston_window::TextureSettings::new().mag(piston_window::Filter::Nearest),
                                       ).unwrap());
                 assets.insert(name, texture);
             }
@@ -370,11 +370,14 @@ where
     let assets = load_assets(&mut window.borrow_mut());
     let mut scene = Scene::new();
 
-    let ferris = assets.get(&String::from("characters/ferris/ferris-happy")).unwrap().clone();
-    let mut ferris = sprite::Sprite::from_texture(ferris);
+    let hero = assets.get(&String::from("characters/detective/Detective")).unwrap().clone();
+    let mut hero = sprite::Sprite::from_texture(hero);
 
-    ferris.set_position(600.0, 400.0);
-    let ferris_id = scene.add_child(ferris);
+    let hero_scale = 10.0;
+    hero.set_position(600.0, 775.0);
+    hero.set_scale(hero_scale, hero_scale);
+
+    let hero_id = scene.add_child(hero);
 
     let seq = Sequence(vec![
         While(Box::new(WaitForever), vec![
@@ -383,7 +386,8 @@ where
         ]),
         ]);
 
-    scene.run(ferris_id, &seq);
+    scene.run(hero_id, &seq);
+
 
     GameMode::new_with_state(window, State::new(), assets, scene)
   }

@@ -7,8 +7,9 @@
     },
     "samples": 0,
     "fullscreen": false,
+    "exit_on_esc": true,
     "vsync": false,
-    "srgb": false,
+    "srgb": true,
     "resizable": false,
     "decorated": true
   },

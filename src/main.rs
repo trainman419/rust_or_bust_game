@@ -22,6 +22,7 @@ extern crate serde_json;
 
 mod application;
 mod config;
+mod entity;
 mod error;
 mod handler;
 mod rust_rider;
