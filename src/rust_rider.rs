@@ -36,7 +36,32 @@ type Point = nalgebra::Point2<f64>;
 type Vector = nalgebra::Vector2<f64>;
 
 type Texture = piston_window::G2dTexture;
-type AssetMap = HashMap<String, Rc<Texture>>;
+
+pub struct Frame {
+    texture: Rc<Texture>,
+    frame_time: u16, // frame delay, units of 10ms
+}
+
+pub struct ImageAsset {
+    frames: Vec<Frame>,
+}
+
+impl ImageAsset {
+    fn new() -> ImageAsset {
+        ImageAsset {
+            frames: Vec::new(),
+        }
+    }
+
+    fn add_frame(&mut self, texture: Rc<Texture>, frame_time: u16) {
+        self.frames.push(Frame {
+            texture,
+            frame_time,
+        });
+    }
+}
+
+type AssetMap = HashMap<String, ImageAsset>;
 
 type Scene = sprite::Scene<Texture>;
 
@@ -366,23 +391,23 @@ where Window: piston_window::Window
                                       piston_window::Flip::None,
                                       &piston_window::TextureSettings::new().mag(piston_window::Filter::Nearest),
                                       ).unwrap());
-                assets.insert(name, texture);
+                let mut asset = ImageAsset::new();
+                asset.add_frame(texture, 0);
+                assets.insert(name, asset);
             }
             "gif" => {
                 use self::gif::Decoder;
                 use self::gif::SetParameter;
                 println!("Loading {}", name);
+                let mut asset = ImageAsset::new();
+
                 let mut decoder = Decoder::new(File::open(&path).expect(&format!("Could not open {:?}", &path)));
                 decoder.set(gif::ColorOutput::RGBA);
                 let mut decoder = decoder.read_info().expect(&format!("Could not decode gif {:?}", &path));
 
                 let size = (decoder.width() as u32, decoder.height() as u32);
                 let frame_size = (size.0 * size.1 * 4) as usize;
-                let mut frame_count: u32 = 0;
                 while let Some(frame) = decoder.read_next_frame().expect(&format!("Could not read next frame from {:?}", &path)) {
-                    let frame_name = format!("{}{}", &name, &frame_count);
-                    println!("Loading frame {}", &frame_name);
-                    // TODO(austin): store frame.delay
                     use self::image::GenericImage;
                     let cur_frame = vec![0u8; frame_size];
                     let src = image::ImageBuffer::<image::Rgba<u8>, Vec<u8>>::from_raw(frame.width as u32, frame.height as u32, frame.buffer.clone().into_owned()).expect("Could not create source image (source too small?)");
@@ -394,9 +419,9 @@ where Window: piston_window::Window
                                           &dst,
                                           &piston_window::TextureSettings::new().mag(piston_window::Filter::Nearest),
                                           ).expect("Could not create Texture"));
-                    assets.insert(frame_name, texture);
-                    frame_count += 1;
+                    asset.add_frame(texture, frame.delay);
                 }
+                assets.insert(name, asset);
             }
             _ => (),
         }
@@ -454,9 +479,11 @@ where
     let assets = load_assets(&mut window.borrow_mut());
     let mut scene = Scene::new();
 
-    let hero = assets.get(&String::from("characters/detective/Detective_idle2"))
-        .expect("Could not find asset").clone();
-    let mut hero = sprite::Sprite::from_texture(hero);
+    let hero_texture = assets.get(&String::from("characters/detective/Detective_idle"))
+        .expect("Could not find asset")
+        .frames.get(0).unwrap().texture.clone();
+
+    let mut hero = sprite::Sprite::from_texture(hero_texture);
 
     let hero_scale = 10.0;
     hero.set_position(600.0, 775.0);
