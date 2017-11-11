@@ -7,7 +7,7 @@ extern crate sprite;
 extern crate tiled;
 extern crate ai_behavior;
 extern crate gif;
-extern crate gif_dispose;
+extern crate image;
 
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -371,25 +371,31 @@ where Window: piston_window::Window
             "gif" => {
                 use self::gif::Decoder;
                 use self::gif::SetParameter;
-                use self::gif_dispose::Screen;
                 println!("Loading {}", name);
-                let mut decoder = Decoder::new(File::open(path).unwrap());
-                decoder.set(gif::ColorOutput::Indexed);
-                let mut decoder = decoder.read_info().unwrap();
-                let mut i = 0;
+                let mut decoder = Decoder::new(File::open(&path).expect(&format!("Could not open {:?}", &path)));
+                decoder.set(gif::ColorOutput::RGBA);
+                let mut decoder = decoder.read_info().expect(&format!("Could not decode gif {:?}", &path));
 
-                let mut screen = Screen::new_reader(&decoder);
-                while let Some(frame) = decoder.read_next_frame().unwrap() {
-                    let frame_name = format!("{}{}", &name, &i);
-                    screen.blit_frame(&frame);
+                let size = (decoder.width() as u32, decoder.height() as u32);
+                let frame_size = (size.0 * size.1 * 4) as usize;
+                let mut frame_count: u32 = 0;
+                while let Some(frame) = decoder.read_next_frame().expect(&format!("Could not read next frame from {:?}", &path)) {
+                    let frame_name = format!("{}{}", &name, &frame_count);
+                    println!("Loading frame {}", &frame_name);
+                    // TODO(austin): store frame.delay
+                    use self::image::GenericImage;
+                    let cur_frame = vec![0u8; frame_size];
+                    let src = image::ImageBuffer::<image::Rgba<u8>, Vec<u8>>::from_raw(frame.width as u32, frame.height as u32, frame.buffer.clone().into_owned()).expect("Could not create source image (source too small?)");
+                    let mut dst = image::ImageBuffer::<image::Rgba<u8>, Vec<u8>>::from_raw(size.0, size.1, cur_frame).expect("Could not create destination image buffer");
+                    dst.copy_from(&src, frame.left as u32, frame.top as u32);
 
                     let texture = Rc::new(piston_window::Texture::from_image(
                                           &mut window.factory,
-                                          screen.pixels, // TODO(austin): nobody wants to own this :/
+                                          &dst,
                                           &piston_window::TextureSettings::new().mag(piston_window::Filter::Nearest),
-                                          ).unwrap());
+                                          ).expect("Could not create Texture"));
                     assets.insert(frame_name, texture);
-                    //i++;
+                    frame_count += 1;
                 }
             }
             _ => (),
@@ -448,7 +454,8 @@ where
     let assets = load_assets(&mut window.borrow_mut());
     let mut scene = Scene::new();
 
-    let hero = assets.get(&String::from("characters/detective/Detective_idle")).expect("Could not find asset").clone();
+    let hero = assets.get(&String::from("characters/detective/Detective_idle2"))
+        .expect("Could not find asset").clone();
     let mut hero = sprite::Sprite::from_texture(hero);
 
     let hero_scale = 10.0;
