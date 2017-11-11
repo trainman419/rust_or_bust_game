@@ -6,111 +6,145 @@ use error;
 pub trait InputHandler {
   fn on_button<Event: piston_window::GenericEvent>(
     &mut self,
-    event: &Event,
-    button_args: &piston_window::ButtonArgs,
-  ) -> error::Result<()>;
+    _event: &Event,
+    _button_args: &piston_window::ButtonArgs,
+  ) -> error::Result<()> {
+    Ok(())
+  }
 
   fn on_controller_axis<Event: piston_window::GenericEvent>(
     &mut self,
-    event: &Event,
-    controller_axis_args: &piston_window::ControllerAxisArgs,
-  ) -> error::Result<()>;
+    _event: &Event,
+    _controller_axis_args: &piston_window::ControllerAxisArgs,
+  ) -> error::Result<()> {
+    Ok(())
+  }
 
   fn on_mouse_cursor<Event: piston_window::GenericEvent>(
     &mut self,
-    event: &Event,
-    position: &[f64; 2],
-  ) -> error::Result<()>;
+    _event: &Event,
+    _position: &[f64; 2],
+  ) -> error::Result<()> {
+    Ok(())
+  }
 
   fn on_mouse_relative<Event: piston_window::GenericEvent>(
     &mut self,
-    event: &Event,
-    relative: &[f64; 2],
-  ) -> error::Result<()>;
+    _event: &Event,
+    _relative: &[f64; 2],
+  ) -> error::Result<()> {
+    Ok(())
+  }
 
   fn on_mouse_scroll<Event: piston_window::GenericEvent>(
     &mut self,
-    event: &Event,
-    scroll: &[f64; 2],
-  ) -> error::Result<()>;
+    _event: &Event,
+    _scroll: &[f64; 2],
+  ) -> error::Result<()> {
+    Ok(())
+  }
 
   fn on_press<Event: piston_window::GenericEvent>(
     &mut self,
-    event: &Event,
-    button: &piston_window::Button,
-  ) -> error::Result<()>;
+    _event: &Event,
+    _button: &piston_window::Button,
+  ) -> error::Result<()> {
+    Ok(())
+  }
 
   fn on_release<Event: piston_window::GenericEvent>(
     &mut self,
-    event: &Event,
-    button: &piston_window::Button,
-  ) -> error::Result<()>;
+    _event: &Event,
+    _button: &piston_window::Button,
+  ) -> error::Result<()> {
+    Ok(())
+  }
 
   fn on_text<Event: piston_window::GenericEvent>(
     &mut self,
-    event: &Event,
-    text: &String,
-  ) -> error::Result<()>;
+    _event: &Event,
+    _text: &String,
+  ) -> error::Result<()> {
+    Ok(())
+  }
 
   fn on_touch<Event: piston_window::GenericEvent>(
     &mut self,
-    event: &Event,
-    touch_args: &piston_window::TouchArgs,
-  ) -> error::Result<()>;
+    _event: &Event,
+    _touch_args: &piston_window::TouchArgs,
+  ) -> error::Result<()> {
+    Ok(())
+  }
 }
 
 /// An interface describing all the different update-events that can be handled.
 pub trait UpdateHandler {
   fn on_idle<Event: piston_window::GenericEvent>(
     &mut self,
-    event: &Event,
-    idle_args: &piston_window::IdleArgs,
-  ) -> error::Result<()>;
+    _event: &Event,
+    _idle_args: &piston_window::IdleArgs,
+  ) -> error::Result<()> {
+    Ok(())
+  }
 
   fn on_update<Event: piston_window::GenericEvent>(
     &mut self,
-    event: &Event,
-    update_args: &piston_window::UpdateArgs,
-  ) -> error::Result<()>;
+    _event: &Event,
+    _update_args: &piston_window::UpdateArgs,
+  ) -> error::Result<()> {
+    Ok(())
+  }
 }
 
 /// An interface describing all the different window-events that can be handled.
 pub trait WindowHandler {
   fn on_after_render<Event: piston_window::GenericEvent>(
     &mut self,
-    event: &Event,
-    after_render_args: &piston_window::AfterRenderArgs,
-  ) -> error::Result<()>;
+    _event: &Event,
+    _after_render_args: &piston_window::AfterRenderArgs,
+  ) -> error::Result<()> {
+    Ok(())
+  }
 
   fn on_close<Event: piston_window::GenericEvent>(
     &mut self,
-    event: &Event,
-    close_args: &piston_window::CloseArgs,
-  ) -> error::Result<()>;
+    _event: &Event,
+    _close_args: &piston_window::CloseArgs,
+  ) -> error::Result<()> {
+    Ok(())
+  }
 
   fn on_cursor<Event: piston_window::GenericEvent>(
     &mut self,
-    event: &Event,
-    cursor: bool,
-  ) -> error::Result<()>;
+    _event: &Event,
+    _cursor: bool,
+  ) -> error::Result<()> {
+    Ok(())
+  }
 
   fn on_focus<Event: piston_window::GenericEvent>(
     &mut self,
-    event: &Event,
-    focus: bool,
-  ) -> error::Result<()>;
+    _event: &Event,
+    _focus: bool,
+  ) -> error::Result<()> {
+    Ok(())
+  }
 
   fn on_render<Event: piston_window::GenericEvent>(
     &mut self,
-    event: &Event,
-    render_args: &piston_window::RenderArgs,
-  ) -> error::Result<()>;
+    _event: &Event,
+    _render_args: &piston_window::RenderArgs,
+  ) -> error::Result<()> {
+    Ok(())
+  }
 
   fn on_resize<Event: piston_window::GenericEvent>(
     &mut self,
-    event: &Event,
-    size: &[u32; 2],
-  ) -> error::Result<()>;
+    _event: &Event,
+    _size: &[u32; 2],
+  ) -> error::Result<()> {
+    Ok(())
+  }
 }
 
 /// An interface that dispatches events to more specific handlers.

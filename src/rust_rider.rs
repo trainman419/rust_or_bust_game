@@ -134,22 +134,6 @@ where
 impl<Window> handler::InputHandler for GameMode<Window>
 where Window: piston_window::Window,
 {
-  fn on_button<Event: piston_window::GenericEvent>(
-    &mut self,
-    _event: &Event,
-    _button_args: &piston_window::ButtonArgs,
-  ) -> error::Result<()> {
-    Ok(())
-  }
-
-  fn on_controller_axis<Event: piston_window::GenericEvent>(
-    &mut self,
-    _event: &Event,
-    _controller_axis_args: &piston_window::ControllerAxisArgs,
-  ) -> error::Result<()> {
-    Ok(())
-  }
-
   fn on_mouse_cursor<Event: piston_window::GenericEvent>(
     &mut self,
     _event: &Event,
@@ -157,22 +141,6 @@ where Window: piston_window::Window,
   ) -> error::Result<()> {
     self.state.mouse_position = Point::new(position[0], position[1]);
 
-    Ok(())
-  }
-
-  fn on_mouse_relative<Event: piston_window::GenericEvent>(
-    &mut self,
-    _event: &Event,
-    _relative: &[f64; 2],
-  ) -> error::Result<()> {
-    Ok(())
-  }
-
-  fn on_mouse_scroll<Event: piston_window::GenericEvent>(
-    &mut self,
-    _event: &Event,
-    _scroll: &[f64; 2],
-  ) -> error::Result<()> {
     Ok(())
   }
 
@@ -245,81 +213,17 @@ where Window: piston_window::Window,
 
     Ok(())
   }
-
-  fn on_text<Event: piston_window::GenericEvent>(
-    &mut self,
-    _event: &Event,
-    _text: &String,
-  ) -> error::Result<()> {
-    Ok(())
-  }
-
-  fn on_touch<Event: piston_window::GenericEvent>(
-    &mut self,
-    _event: &Event,
-    _touch_args: &piston_window::TouchArgs,
-  ) -> error::Result<()> {
-    Ok(())
-  }
 }
 
 /// How GameMode responds to update-events.
 impl<Window> handler::UpdateHandler for GameMode<Window>
 where Window: piston_window::Window,
-{
-  fn on_idle<Event: piston_window::GenericEvent>(
-    &mut self,
-    _event: &Event,
-    _idle_args: &piston_window::IdleArgs,
-  ) -> error::Result<()> {
-    Ok(())
-  }
-
-  fn on_update<Event: piston_window::GenericEvent>(
-    &mut self,
-    _event: &Event,
-    _update_args: &piston_window::UpdateArgs,
-  ) -> error::Result<()> {
-    Ok(())
-  }
-}
+{}
 
 /// How GameMode responds to window-events.
 impl<Window> handler::WindowHandler for GameMode<Window>
 where Window: piston_window::OpenGLWindow,
 {
-  fn on_after_render<Event: piston_window::GenericEvent>(
-    &mut self,
-    _event: &Event,
-    _after_render_args: &piston_window::AfterRenderArgs,
-  ) -> error::Result<()> {
-    Ok(())
-  }
-
-  fn on_close<Event: piston_window::GenericEvent>(
-    &mut self,
-    _event: &Event,
-    _close_args: &piston_window::CloseArgs,
-  ) -> error::Result<()> {
-    Ok(())
-  }
-
-  fn on_cursor<Event: piston_window::GenericEvent>(
-    &mut self,
-    _event: &Event,
-    _cursor: bool,
-  ) -> error::Result<()> {
-    Ok(())
-  }
-
-  fn on_focus<Event: piston_window::GenericEvent>(
-    &mut self,
-    _event: &Event,
-    _focus: bool,
-  ) -> error::Result<()> {
-    Ok(())
-  }
-
   fn on_render<Event: piston_window::GenericEvent>(
     &mut self,
     event: &Event,
@@ -376,14 +280,6 @@ where Window: piston_window::OpenGLWindow,
       self.scene.draw(context.transform, graphics);
     });
 
-    Ok(())
-  }
-
-  fn on_resize<Event: piston_window::GenericEvent>(
-    &mut self,
-    _event: &Event,
-    _size: &[u32; 2],
-  ) -> error::Result<()> {
     Ok(())
   }
 }
