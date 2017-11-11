@@ -18,6 +18,14 @@ rustup default nightly
 git clone git@github.com:trainman419/rust_or_bust_game.git
 ```
 
+### Dependencies
+
+```
+mkdir -p ~/.cargo ~/forks
+git clone git@github.com:PistonDevelopers/piston.git ~/forks/piston
+echo 'paths = ["forks/piston"]' > ~/.cargo/config
+```
+
 ### Build
 
 ```
