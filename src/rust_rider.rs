@@ -504,9 +504,9 @@ where Window: piston_window::OpenGLWindow,
 {
   fn before_event<Event: piston_window::GenericEvent>(
     &mut self,
-    _event: &Event,
+    event: &Event,
   ) -> error::Result<()> {
-    self.scene.event(_event);
+    self.scene.event(event);
     Ok(())
   }
 }
