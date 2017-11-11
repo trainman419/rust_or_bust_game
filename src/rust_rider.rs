@@ -373,11 +373,7 @@ where Window: piston_window::OpenGLWindow,
         line.draw(&context, graphics);
       }
 
-//      piston_window::image(
-//          &self.ferris,
-//          context.transform,
-//          graphics,
-//          );
+      self.scene.draw(context.transform, graphics);
     });
 
     Ok(())
@@ -436,8 +432,15 @@ where
     window: Rc<RefCell<piston_window::PistonWindow<Window>>>,
   ) -> GameMode<Window> {
     let assets = load_assets(&mut window.borrow_mut());
+    let mut scene = Scene::new();
 
-    GameMode::new_with_state(window, State::new(), assets, sprite::Scene::new())
+    let ferris = assets.get(&String::from("ferris")).unwrap().clone();
+    let mut ferris = sprite::Sprite::from_texture(ferris);
+
+    ferris.set_position(600.0, 400.0);
+    scene.add_child(ferris);
+
+    GameMode::new_with_state(window, State::new(), assets, scene)
   }
 
   /// Create a GameMode with an existing State.
