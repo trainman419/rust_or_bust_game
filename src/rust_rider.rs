@@ -519,13 +519,13 @@ where
   ) -> GameMode<Window> {
     use piston_window::Window; // size
     let window_size = window.borrow().size();
-    let viewport = camera::WorldVector::new(window_size.width as f64,
-                                            window_size.height as f64);
+    let viewport = camera::WorldVector2::new(window_size.width as f64,
+                                             window_size.height as f64);
 
     let camera = camera::Camera2 {
       viewport: viewport,
-      position: camera::WorldPoint::new(0.0, 0.0),
-      velocity: camera::WorldVector::new(0.0, 0.0),
+      position: camera::WorldPoint2::new(0.0, 0.0),
+      velocity: camera::WorldVector2::new(0.0, 0.0),
     };
 
     let assets = load_assets(&mut window.borrow_mut());
