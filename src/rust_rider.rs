@@ -341,7 +341,14 @@ where Window: piston_window::Window
 /// Inherit default implementation of EventHandler::on_event.
 impl<Window> handler::EventHandler for GameMode<Window>
 where Window: piston_window::OpenGLWindow,
-{}
+{
+  fn before_event<Event: piston_window::GenericEvent>(
+    &mut self,
+    _event: &Event,
+  ) -> error::Result<()> {
+    Ok(())
+  }
+}
 
 impl<Window> GameMode<Window>
 where

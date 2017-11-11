@@ -149,10 +149,26 @@ pub trait WindowHandler {
 
 /// An interface that dispatches events to more specific handlers.
 pub trait EventHandler: InputHandler + UpdateHandler + WindowHandler {
+  fn before_event<Event: piston_window::GenericEvent>(
+    &mut self,
+    _event: &Event,
+  ) -> error::Result<()> {
+    Ok(())
+  }
+
+  fn after_event<Event: piston_window::GenericEvent>(
+    &mut self,
+    _event: &Event,
+  ) -> error::Result<()> {
+    Ok(())
+  }
+
   fn on_event<Event: piston_window::GenericEvent>(
     &mut self,
     event: &Event,
   ) -> error::Result<()> {
+    self.before_event::<Event>(&event)?;
+
     // Dispatch input events to InputHandler functions.
     if let Some(button) = event.button_args() {
       self.on_button::<Event>(&event, &button)?;
@@ -209,6 +225,8 @@ pub trait EventHandler: InputHandler + UpdateHandler + WindowHandler {
     if let Some(resize) = event.resize_args() {
       self.on_resize::<Event>(&event, &resize)?;
     }
+
+    self.after_event::<Event>(&event)?;
 
     Ok(())
   }
