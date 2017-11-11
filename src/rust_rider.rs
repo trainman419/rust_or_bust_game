@@ -30,6 +30,7 @@ type Vector = nalgebra::Vector2<f64>;
 
 type Texture = piston_window::G2dTexture;
 type AssetMap = HashMap<String, Rc<Texture>>;
+type SceneRcRef = Rc<RefCell<sprite::Scene<Texture>>>;
 
 type Scene = sprite::Scene<Texture>;
 
@@ -135,7 +136,7 @@ where
   state: State,
   window: Rc<RefCell<piston_window::PistonWindow<Window>>>,
   assets: AssetMap,
-  scene: Scene,
+  scene: SceneRcRef,
 }
 
 /// How GameMode responds to input-events.
@@ -285,7 +286,7 @@ where Window: piston_window::OpenGLWindow,
         line.draw(&context, graphics);
       }
 
-      self.scene.draw(context.transform, graphics);
+      self.scene.borrow_mut().draw(context.transform, graphics);
     });
 
     Ok(())
@@ -353,7 +354,7 @@ where Window: piston_window::OpenGLWindow,
     &mut self,
     _event: &Event,
   ) -> error::Result<()> {
-    self.scene.event(_event);
+    self.scene.borrow_mut().event(_event);
     Ok(())
   }
 }
@@ -367,19 +368,19 @@ where
     window: Rc<RefCell<piston_window::PistonWindow<Window>>>,
   ) -> GameMode<Window> {
     let assets = load_assets(&mut window.borrow_mut());
-    let mut scene = Scene::new();
+    let mut scene = Rc::new(RefCell::new(Scene::new()));
     let mut state = State::new();
 
     // Build the default hero
     let hero_scale = 10.0;
-    let mut hero = hero::Hero::new(&assets, &mut Rc::new(RefCell::new(scene)));
+    let mut hero = hero::Hero::new(&assets, scene.clone());
     hero.set_position(600.0, 775.0);
     hero.set_scale(hero_scale);
 
     let hero_id = hero.get_sprite_id();
     state.entities.insert(String::from("hero"), Rc::new(hero));
 
-    GameMode::new_with_state(window, state, assets, scene)
+    GameMode::new_with_state(window, state, assets, scene.clone())
   }
 
   /// Create a GameMode with an existing State.
@@ -387,7 +388,7 @@ where
     window: Rc<RefCell<piston_window::PistonWindow<Window>>>,
     state: State,
     assets: AssetMap,
-    scene: Scene,
+    scene: SceneRcRef,
   ) -> GameMode<Window> {
     GameMode {
       window: window,

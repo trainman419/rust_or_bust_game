@@ -17,23 +17,23 @@ use std::collections::HashMap;
 use entity;
 
 type Texture = piston_window::G2dTexture;
-type SceneRef = Rc<RefCell<sprite::Scene<Texture>>>;
+type SceneRcRef = Rc<RefCell<sprite::Scene<Texture>>>;
 
 
 const DEFAULT_SCALE: f64 = 1.0;
 
 
-pub struct Hero<'a> {
+pub struct Hero {
     pos_x: f64,
     pos_y: f64,
     sprite_id: uuid::Uuid,
-    scene: &'a mut SceneRef,
+    scene: SceneRcRef,
 }
 
 
-impl<'a> Hero<'a> {
+impl Hero {
   pub fn new(assets: &HashMap<String, Rc<Texture>>,
-             scene: &'a mut SceneRef) -> Hero<'a> {
+             scene: SceneRcRef) -> Hero {
     let hero_sprite = assets.get(&String::from("characters/detective/Detective")).unwrap().clone();
     let mut hero_sprite = sprite::Sprite::from_texture(hero_sprite);
 
@@ -61,7 +61,7 @@ impl<'a> Hero<'a> {
 }
 
 
-impl<'a> entity::Actor for Hero<'a> {
+impl entity::Actor for Hero {
   fn interact_hero(&mut self) {
     println!("Hero interacted with Hero!");
   }
@@ -72,7 +72,7 @@ impl<'a> entity::Actor for Hero<'a> {
 }
 
 
-impl<'a> entity::Position for Hero<'a> {
+impl entity::Position for Hero {
   fn x(&self) -> f64 {
     self.pos_x
   }
@@ -92,7 +92,7 @@ impl<'a> entity::Position for Hero<'a> {
 }
 
 
-impl<'a> entity::Scaled for Hero<'a> {
+impl entity::Scaled for Hero {
 
   fn set_scale(&mut self, new_scale: f64) {
     match self.scene.borrow_mut().child_mut(self.sprite_id) {
@@ -116,7 +116,7 @@ impl<'a> entity::Scaled for Hero<'a> {
 }
 
 
-impl<'a> entity::Sprited for Hero<'a> {
+impl entity::Sprited for Hero {
   fn get_sprite_id(&self) -> uuid::Uuid {
     self.sprite_id
   }
