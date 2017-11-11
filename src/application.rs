@@ -35,7 +35,7 @@ where
     &mut self,
     name: &str,
     application_mode: Box<EventHandler>,
-    ) -> error::Result<()> {
+  ) -> error::Result<()> {
     match self.application_modes.insert(String::from(name), application_mode) {
       Some(_) => Err(error::Error::from(
           format!("Application mode {} already exists", name),
