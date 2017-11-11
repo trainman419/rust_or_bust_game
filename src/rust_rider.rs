@@ -17,6 +17,26 @@ enum EditMode {
 type Point = nalgebra::Point2<f64>;
 type Vector = nalgebra::Vector2<f64>;
 
+fn draw_rectangle<G>(
+  point1: &Point,
+  point2: &Point,
+  context: &piston_window::Context,
+  graphics: &mut G,
+) where
+  G: graphics::Graphics,
+{
+  use self::graphics::Transformed; // piston_window::Context.{trans,orient}
+  let delta = point2 - point1;
+  piston_window::rectangle(
+    CYAN,
+    [0.0, 0.0, delta[0], delta[1]],
+    context
+      .trans(point1.x, point1.y)
+      .transform,
+    graphics,
+  );
+}
+
 fn draw_line_segment<G>(
   point1: &Point,
   point2: &Point,
@@ -62,16 +82,18 @@ impl LineSegment {
   }
 }
 
+const CYAN:  piston_window::types::Color = [0.0, 1.0, 1.0, 0.5];
 const BLACK: piston_window::types::Color = [0.0, 0.0, 0.0, 1.0];
 const GREEN: piston_window::types::Color = [0.0, 1.0, 0.0, 1.0];
-const BLUE: piston_window::types::Color = [0.0, 0.0, 1.0, 1.0];
+const BLUE:  piston_window::types::Color = [0.0, 0.0, 1.0, 1.0];
 
-/// The game-state of the Rust Rider game. The state should act as the save data
+/// The game-ion of the Rust Rider game. The state should act as the save data
 /// for a resumable session of the game.
 pub struct State {
   edit_mode: EditMode,
   line_segments: Vec<LineSegment>,
   active_line_segment: Option<Point>,
+  active_selection: Option<Point>,
   mouse_position: Point,
 }
 
@@ -82,6 +104,7 @@ impl State {
       edit_mode: EditMode::Insert,
       line_segments: Vec::new(),
       active_line_segment: None,
+      active_selection: None,
       mouse_position: Point::new(0.0, 0.0),
     }
   }
@@ -155,7 +178,14 @@ where Window: piston_window::Window,
       },
       &piston_window::Button::Mouse(mouse_button) => match mouse_button {
         piston_window::MouseButton::Left => {
-          self.state.active_line_segment = Some(self.state.mouse_position);
+          match self.state.edit_mode {
+            EditMode::Select => {
+              self.state.active_selection = Some(self.state.mouse_position);
+            },
+            EditMode::Insert => {
+              self.state.active_line_segment = Some(self.state.mouse_position);
+            },
+          }
         },
         _ => {},
       },
@@ -179,6 +209,14 @@ where Window: piston_window::Window,
       },
       &piston_window::Button::Mouse(mouse_button) => match mouse_button {
         piston_window::MouseButton::Left => {
+          match self.state.active_selection {
+            Some(point1) => {
+              //self.state.line_segments.push(
+                //LineSegment::new(point1, self.state.mouse_position));
+              self.state.active_selection = None;
+            }
+            None => {}
+          }
           match self.state.active_line_segment {
             Some(point1) => {
               self.state.line_segments.push(
@@ -304,6 +342,13 @@ where Window: piston_window::OpenGLWindow,
         context.transform,
         graphics,
       );
+
+      match state.active_selection {
+        Some(point1) => {
+          draw_rectangle(&point1, &state.mouse_position, &context, graphics);
+        }
+        None => {}
+      }
 
       match state.active_line_segment {
         Some(point1) => {
