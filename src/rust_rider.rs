@@ -1,3 +1,4 @@
+extern crate ears;
 extern crate graphics;
 extern crate nalgebra;
 extern crate piston;
@@ -10,6 +11,9 @@ extern crate ai_behavior;
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::collections::HashMap;
+use std::thread;
+
+use self::ears::{Sound, Music, AudioController};
 
 use std::path::Path;
 
@@ -107,6 +111,38 @@ const BLACK: piston_window::types::Color = [0.0, 0.0, 0.0, 1.0];
 const GREEN: piston_window::types::Color = [0.0, 1.0, 0.0, 1.0];
 const BLUE:  piston_window::types::Color = [0.0, 0.0, 1.0, 1.0];
 
+pub struct SoundEffects {
+  music: thread::JoinHandle<()>,
+  sounds: Vec<thread::JoinHandle<()>>,
+}
+
+impl SoundEffects {
+}
+
+fn play_sound_effect(file: &str) {
+  let mut path = String::from("assets/sounds/effects/");
+  let mut filename = "";
+
+  match file {
+    "test" => filename = "bullet-shell.wav",
+    _ => {}
+  }
+
+  if (filename == "") {
+    println!("Could not find file");
+    return ();
+  }
+
+  path.push_str(filename);
+  let handle = thread::spawn(move || {
+    let mut sound = Sound::new(&path).unwrap();
+    sound.play();
+    while sound.is_playing() {
+      // Todo: Maybe something here
+    }
+  });
+}
+
 /// The game-ion of the Rust Rider game. The state should act as the save data
 /// for a resumable session of the game.
 pub struct State {
@@ -163,6 +199,13 @@ where Window: piston_window::Window,
   ) -> error::Result<()> {
     match button {
       &piston_window::Button::Keyboard(key) => match key {
+        // This is a dirty way to just close the game.
+        piston_window::Key::Q => {
+          return Err(error::Error::from("Exited Game"));
+        },
+        piston_window::Key::X => {
+          play_sound_effect("test");
+        },
         piston_window::Key::LShift | piston_window::Key::RShift => {
           self.state.edit_mode = EditMode::Select;
         },
