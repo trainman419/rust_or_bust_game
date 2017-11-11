@@ -285,19 +285,42 @@ where Window: piston_window::OpenGLWindow,
 }
 
 fn load_assets_from_dir<Window>(
-  window: &mut piston_window::PistonWindow<Window>,
+  mut window: &mut piston_window::PistonWindow<Window>,
   dir: &Path,
-  assets: &mut AssetMap)
+  prefix: &str,
+  mut assets: &mut AssetMap)
 where Window: piston_window::Window
 {
-  let ferris = Rc::new(piston_window::Texture::from_path(
-      &mut window.factory,
-      dir.join("characters/ferris/ferris-happy.png"),
-      piston_window::Flip::None,
-      &piston_window::TextureSettings::new()
-      ).unwrap());
+  for entry in dir.read_dir().expect("read dir call failed") {
+    if let Ok(entry) = entry {
+      if entry.file_type().unwrap().is_dir() {
 
-  assets.insert(String::from("ferris"), ferris);
+        let name = if prefix.len() > 0 {
+            prefix.to_owned() + "/" + entry.file_name().to_str().unwrap()
+        } else {
+            entry.file_name().to_str().unwrap().to_owned()
+        };
+
+        load_assets_from_dir(&mut window, &entry.path(), &name, &mut assets);
+      } else if entry.file_type().unwrap().is_file() {
+        let path = entry.path();
+        let name = prefix.to_owned() + "/" + path.file_stem().unwrap().to_str().unwrap();
+        match path.extension().unwrap().to_str().unwrap() {
+            "png" => {
+                println!("Loading {}", name);
+        assets.insert(name,
+                Rc::new(piston_window::Texture::from_path(
+                        &mut window.factory,
+                        path,
+                        piston_window::Flip::None,
+                        &piston_window::TextureSettings::new()
+                        ).unwrap()));
+            }
+            _ => (),
+        }
+      }
+    }
+  }
 }
 
 fn load_assets<Window>(mut window: &mut piston_window::PistonWindow<Window>) -> AssetMap
@@ -309,7 +332,7 @@ where Window: piston_window::Window
 
   let asset_dir = find_folder::Search::ParentsThenKids(3,3).for_folder("assets").unwrap();
 
-  load_assets_from_dir(&mut window, &asset_dir, &mut assets);
+  load_assets_from_dir(&mut window, &asset_dir, "", &mut assets);
 
   return assets;
 }
@@ -330,7 +353,7 @@ where
     let assets = load_assets(&mut window.borrow_mut());
     let mut scene = Scene::new();
 
-    let ferris = assets.get(&String::from("ferris")).unwrap().clone();
+    let ferris = assets.get(&String::from("characters/ferris/ferris-happy")).unwrap().clone();
     let mut ferris = sprite::Sprite::from_texture(ferris);
 
     ferris.set_position(600.0, 400.0);
