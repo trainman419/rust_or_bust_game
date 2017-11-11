@@ -152,7 +152,7 @@ impl SoundEffects {
     }
   }
 
-  pub fn play(file: &str) {
+  pub fn play(&self, file: &str) {
     let mut path = String::from("assets/sounds/effects/");
     let mut filename = "";
 
@@ -161,7 +161,7 @@ impl SoundEffects {
       _ => {}
     }
 
-    if (filename == "") {
+    if filename == "" {
       println!("Could not find file");
       return ();
     }
@@ -240,8 +240,7 @@ where Window: piston_window::Window,
           return Err(error::Error::from("Exited Game"));
         },
         piston_window::Key::X => {
-          // Chris why
-          //self.state.sound_effects.play("test");
+          self.state.sound_effects.play("test");
         },
         piston_window::Key::LShift | piston_window::Key::RShift => {
           self.state.edit_mode = EditMode::Select;
