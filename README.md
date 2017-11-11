@@ -14,14 +14,20 @@ rustup default nightly
 
 ### Checkout
 
+```
 git clone git@github.com:trainman419/rust_or_bust_game.git
+```
 
 ### Build
 
+```
 cd rust_or_bust_game
 cargo build
+```
 
 ### Play
 
+```
 cd rust_or_bust_game
 cargo run
+```
