@@ -24,7 +24,7 @@ mod application;
 mod config;
 mod error;
 mod handler;
-mod rust_rider;
+mod start_menu;
 
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -47,11 +47,11 @@ fn run() -> error::Result<()> {
   let mut app = application::Application::<_, _>::new(window.clone());
   app
     .add_application_mode(
-      "rust_rider",
-      Box::new(rust_rider::GameMode::<_>::new(window.clone())),
+      "start_menu",
+      Box::new(start_menu::GameMode::<_>::new(window.clone())),
     )
     .chain_err(|| "Failed to add rust rider application mode")?;
-  app.set_active_application_mode("rust_rider").chain_err(
+  app.set_active_application_mode("start_menu").chain_err(
     || {
       "Failed to activate rust rider application mode"
     },
