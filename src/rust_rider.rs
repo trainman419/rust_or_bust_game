@@ -20,6 +20,7 @@ use self::ai_behavior::{
     WaitForever,
 };
 
+use camera;
 use error;
 use handler;
 
@@ -114,17 +115,19 @@ pub struct State {
   active_line_segment: Option<Point>,
   active_selection: Option<Point>,
   mouse_position: Point,
+  camera: camera::Camera2,
 }
 
 impl State {
   /// Create a State with default values for a new game.
-  pub fn new() -> State {
+  pub fn new(camera: camera::Camera2) -> State {
     State {
       edit_mode: EditMode::Insert,
       line_segments: Vec::new(),
       active_line_segment: None,
       active_selection: None,
       mouse_position: Point::new(0.0, 0.0),
+      camera: camera,
     }
   }
 }
@@ -163,6 +166,18 @@ where Window: piston_window::Window,
         piston_window::Key::LShift | piston_window::Key::RShift => {
           self.state.edit_mode = EditMode::Select;
         },
+        piston_window::Key::Left => {
+          self.state.camera.velocity.x = -500.0;
+        },
+        piston_window::Key::Right => {
+          self.state.camera.velocity.x = 500.0;
+        },
+        piston_window::Key::Up => {
+          self.state.camera.velocity.y = 500.0;
+        },
+        piston_window::Key::Down => {
+          self.state.camera.velocity.y = -500.0;
+        },
         _ => {},
       },
       &piston_window::Button::Mouse(mouse_button) => match mouse_button {
@@ -194,14 +209,24 @@ where Window: piston_window::Window,
         piston_window::Key::LShift | piston_window::Key::RShift => {
           self.state.edit_mode = EditMode::Insert;
         },
+        piston_window::Key::Left => {
+          self.state.camera.velocity.x = 0.0;
+        },
+        piston_window::Key::Right => {
+          self.state.camera.velocity.x = 0.0;
+        },
+        piston_window::Key::Up => {
+          self.state.camera.velocity.y = 0.0;
+        },
+        piston_window::Key::Down => {
+          self.state.camera.velocity.y = 0.0;
+        },
         _ => {},
       },
       &piston_window::Button::Mouse(mouse_button) => match mouse_button {
         piston_window::MouseButton::Left => {
           match self.state.active_selection {
-            Some(point1) => {
-              //self.state.line_segments.push(
-                //LineSegment::new(point1, self.state.mouse_position));
+            Some(_) => {
               self.state.active_selection = None;
             }
             None => {}
@@ -227,7 +252,17 @@ where Window: piston_window::Window,
 /// How GameMode responds to update-events.
 impl<Window> handler::UpdateHandler for GameMode<Window>
 where Window: piston_window::Window,
-{}
+{
+  fn on_update<Event: piston_window::GenericEvent>(
+    &mut self,
+    _event: &Event,
+    update_args: &piston_window::UpdateArgs,
+  ) -> error::Result<()> {
+    self.state.camera.on_update(update_args);
+
+    Ok(())
+  }
+}
 
 /// How GameMode responds to window-events.
 impl<Window> handler::WindowHandler for GameMode<Window>
@@ -239,6 +274,7 @@ where Window: piston_window::OpenGLWindow,
     _render_args: &piston_window::RenderArgs,
   ) -> error::Result<()> {
     use piston_window::Window; // size
+    use self::graphics::Transformed; // piston_window::Context.{trans,orient}
 
     // Borrow member references immutably before allowing self to be borrowed
     // mutably by self.window.draw_2d().
@@ -286,7 +322,11 @@ where Window: piston_window::OpenGLWindow,
         line.draw(&context, graphics);
       }
 
-      self.scene.draw(context.transform, graphics);
+      self.scene.draw(
+        context.trans(-self.state.camera.position.x,
+                      self.state.camera.position.y).transform,
+        graphics,
+      );
     });
 
     Ok(())
@@ -367,6 +407,17 @@ where
   pub fn new(
     window: Rc<RefCell<piston_window::PistonWindow<Window>>>,
   ) -> GameMode<Window> {
+    use piston_window::Window; // size
+    let window_size = window.borrow().size();
+    let viewport = camera::WorldVector::new(window_size.width as f64,
+                                            window_size.height as f64);
+
+    let camera = camera::Camera2 {
+      viewport: viewport,
+      position: camera::WorldPoint::new(0.0, 0.0),
+      velocity: camera::WorldVector::new(0.0, 0.0),
+    };
+
     let assets = load_assets(&mut window.borrow_mut());
     let mut scene = Scene::new();
 
@@ -389,7 +440,7 @@ where
     scene.run(hero_id, &seq);
 
 
-    GameMode::new_with_state(window, State::new(), assets, scene)
+    GameMode::new_with_state(window, State::new(camera), assets, scene)
   }
 
   /// Create a GameMode with an existing State.

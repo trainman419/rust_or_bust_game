@@ -21,6 +21,7 @@ extern crate serde_derive;
 extern crate serde_json;
 
 mod application;
+mod camera;
 mod config;
 mod entity;
 mod error;
