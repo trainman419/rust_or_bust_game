@@ -2,9 +2,14 @@ extern crate graphics;
 extern crate nalgebra;
 extern crate piston;
 extern crate piston_window;
+extern crate find_folder;
+extern crate sprite;
 
 use std::cell::RefCell;
 use std::rc::Rc;
+use std::collections::HashMap;
+
+use std::path::Path;
 
 use error;
 use handler;
@@ -16,6 +21,11 @@ enum EditMode {
 
 type Point = nalgebra::Point2<f64>;
 type Vector = nalgebra::Vector2<f64>;
+
+type Texture = piston_window::G2dTexture;
+type AssetMap = HashMap<String, Rc<Texture>>;
+
+type Scene = sprite::Scene<Texture>;
 
 fn draw_rectangle<G>(
   point1: &Point,
@@ -116,6 +126,8 @@ where
 {
   state: State,
   window: Rc<RefCell<piston_window::PistonWindow<Window>>>,
+  assets: AssetMap,
+  scene: Scene,
 }
 
 /// How GameMode responds to input-events.
@@ -360,6 +372,12 @@ where Window: piston_window::OpenGLWindow,
       for line in state.line_segments.iter() {
         line.draw(&context, graphics);
       }
+
+//      piston_window::image(
+//          &self.ferris,
+//          context.transform,
+//          graphics,
+//          );
     });
 
     Ok(())
@@ -372,6 +390,36 @@ where Window: piston_window::OpenGLWindow,
   ) -> error::Result<()> {
     Ok(())
   }
+}
+
+fn load_assets_from_dir<Window>(
+  window: &mut piston_window::PistonWindow<Window>,
+  dir: &Path,
+  assets: &mut AssetMap)
+where Window: piston_window::Window
+{
+  let ferris = Rc::new(piston_window::Texture::from_path(
+      &mut window.factory,
+      dir.join("characters/ferris/ferris-happy.png"),
+      piston_window::Flip::None,
+      &piston_window::TextureSettings::new()
+      ).unwrap());
+
+  assets.insert(String::from("ferris"), ferris);
+}
+
+fn load_assets<Window>(mut window: &mut piston_window::PistonWindow<Window>) -> AssetMap
+where Window: piston_window::Window
+{
+  let mut assets = HashMap::new();
+  // Load assets. This probably isn't the place, but we'll deal with that
+  // later.
+
+  let asset_dir = find_folder::Search::ParentsThenKids(3,3).for_folder("assets").unwrap();
+
+  load_assets_from_dir(&mut window, &asset_dir, &mut assets);
+
+  return assets;
 }
 
 /// Inherit default implementation of EventHandler::on_event.
@@ -387,17 +435,23 @@ where
   pub fn new(
     window: Rc<RefCell<piston_window::PistonWindow<Window>>>,
   ) -> GameMode<Window> {
-    GameMode::new_with_state(window, State::new())
+    let assets = load_assets(&mut window.borrow_mut());
+
+    GameMode::new_with_state(window, State::new(), assets, sprite::Scene::new())
   }
 
   /// Create a GameMode with an existing State.
   pub fn new_with_state(
     window: Rc<RefCell<piston_window::PistonWindow<Window>>>,
     state: State,
+    assets: AssetMap,
+    scene: Scene,
   ) -> GameMode<Window> {
     GameMode {
       window: window,
       state: state,
+      assets,
+      scene,
     }
   }
 }
