@@ -434,48 +434,50 @@ where Window: piston_window::Window
       } else if entry.file_type().unwrap().is_file() {
         let path = entry.path();
         let name = prefix.to_owned() + "/" + path.file_stem().unwrap().to_str().unwrap();
-        match path.extension().unwrap().to_str().unwrap() {
-            "png" => {
-                println!("Loading {}", name);
-                let texture = Rc::new(piston_window::Texture::from_path(
-                                      &mut window.factory,
-                                      path,
-                                      piston_window::Flip::None,
-                                      &piston_window::TextureSettings::new().mag(piston_window::Filter::Nearest),
-                                      ).unwrap());
-                let mut asset = ImageAsset::new();
-                asset.add_frame(texture, 0);
-                assets.insert(name, asset);
-            }
-            "gif" => {
-                use self::gif::Decoder;
-                use self::gif::SetParameter;
-                println!("Loading {}", name);
-                let mut asset = ImageAsset::new();
+        if let Some(extension) = entry.path().extension() {
+          match extension.to_str().unwrap() {
+              "png" => {
+                  println!("Loading {}", name);
+                  let texture = Rc::new(piston_window::Texture::from_path(
+                                        &mut window.factory,
+                                        path,
+                                        piston_window::Flip::None,
+                                        &piston_window::TextureSettings::new().mag(piston_window::Filter::Nearest),
+                                        ).unwrap());
+                  let mut asset = ImageAsset::new();
+                  asset.add_frame(texture, 0);
+                  assets.insert(name, asset);
+              }
+              "gif" => {
+                  use self::gif::Decoder;
+                  use self::gif::SetParameter;
+                  println!("Loading {}", name);
+                  let mut asset = ImageAsset::new();
 
-                let mut decoder = Decoder::new(File::open(&path).expect(&format!("Could not open {:?}", &path)));
-                decoder.set(gif::ColorOutput::RGBA);
-                let mut decoder = decoder.read_info().expect(&format!("Could not decode gif {:?}", &path));
+                  let mut decoder = Decoder::new(File::open(&path).expect(&format!("Could not open {:?}", &path)));
+                  decoder.set(gif::ColorOutput::RGBA);
+                  let mut decoder = decoder.read_info().expect(&format!("Could not decode gif {:?}", &path));
 
-                let size = (decoder.width() as u32, decoder.height() as u32);
-                let frame_size = (size.0 * size.1 * 4) as usize;
-                while let Some(frame) = decoder.read_next_frame().expect(&format!("Could not read next frame from {:?}", &path)) {
-                    use self::image::GenericImage;
-                    let cur_frame = vec![0u8; frame_size];
-                    let src = image::ImageBuffer::<image::Rgba<u8>, Vec<u8>>::from_raw(frame.width as u32, frame.height as u32, frame.buffer.clone().into_owned()).expect("Could not create source image (source too small?)");
-                    let mut dst = image::ImageBuffer::<image::Rgba<u8>, Vec<u8>>::from_raw(size.0, size.1, cur_frame).expect("Could not create destination image buffer");
-                    dst.copy_from(&src, frame.left as u32, frame.top as u32);
+                  let size = (decoder.width() as u32, decoder.height() as u32);
+                  let frame_size = (size.0 * size.1 * 4) as usize;
+                  while let Some(frame) = decoder.read_next_frame().expect(&format!("Could not read next frame from {:?}", &path)) {
+                      use self::image::GenericImage;
+                      let cur_frame = vec![0u8; frame_size];
+                      let src = image::ImageBuffer::<image::Rgba<u8>, Vec<u8>>::from_raw(frame.width as u32, frame.height as u32, frame.buffer.clone().into_owned()).expect("Could not create source image (source too small?)");
+                      let mut dst = image::ImageBuffer::<image::Rgba<u8>, Vec<u8>>::from_raw(size.0, size.1, cur_frame).expect("Could not create destination image buffer");
+                      dst.copy_from(&src, frame.left as u32, frame.top as u32);
 
-                    let texture = Rc::new(piston_window::Texture::from_image(
-                                          &mut window.factory,
-                                          &dst,
-                                          &piston_window::TextureSettings::new().mag(piston_window::Filter::Nearest),
-                                          ).expect("Could not create Texture"));
-                    asset.add_frame(texture, frame.delay);
-                }
-                assets.insert(name, asset);
-            }
-            _ => (),
+                      let texture = Rc::new(piston_window::Texture::from_image(
+                                            &mut window.factory,
+                                            &dst,
+                                            &piston_window::TextureSettings::new().mag(piston_window::Filter::Nearest),
+                                            ).expect("Could not create Texture"));
+                      asset.add_frame(texture, frame.delay);
+                  }
+                  assets.insert(name, asset);
+              }
+              _ => (),
+          }
         }
       }
     }
