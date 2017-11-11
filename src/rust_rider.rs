@@ -140,35 +140,41 @@ const GREEN: piston_window::types::Color = [0.0, 1.0, 0.0, 1.0];
 const BLUE:  piston_window::types::Color = [0.0, 0.0, 1.0, 1.0];
 
 pub struct SoundEffects {
-  music: thread::JoinHandle<()>,
+  music: Option<thread::JoinHandle<()>>,
   sounds: Vec<thread::JoinHandle<()>>,
 }
 
 impl SoundEffects {
-}
-
-fn play_sound_effect(file: &str) {
-  let mut path = String::from("assets/sounds/effects/");
-  let mut filename = "";
-
-  match file {
-    "test" => filename = "bullet-shell.wav",
-    _ => {}
-  }
-
-  if (filename == "") {
-    println!("Could not find file");
-    return ();
-  }
-
-  path.push_str(filename);
-  let handle = thread::spawn(move || {
-    let mut sound = Sound::new(&path).unwrap();
-    sound.play();
-    while sound.is_playing() {
-      // Todo: Maybe something here
+  pub fn new() -> SoundEffects {
+    SoundEffects {
+      music: None,
+      sounds: Vec::new(),
     }
-  });
+  }
+
+  pub fn play(file: &str) {
+    let mut path = String::from("assets/sounds/effects/");
+    let mut filename = "";
+
+    match file {
+      "test" => filename = "bullet-shell.wav",
+      _ => {}
+    }
+
+    if (filename == "") {
+      println!("Could not find file");
+      return ();
+    }
+
+    path.push_str(filename);
+    let handle = thread::spawn(move || {
+      let mut sound = Sound::new(&path).unwrap();
+      sound.play();
+      while sound.is_playing() {
+        // Todo: Maybe something here
+      }
+    });
+  }
 }
 
 /// The game-ion of the Rust Rider game. The state should act as the save data
@@ -180,6 +186,7 @@ pub struct State {
   active_selection: Option<Point>,
   mouse_position: Point,
   camera: camera::Camera2,
+  sound_effects: SoundEffects,
 }
 
 impl State {
@@ -192,6 +199,7 @@ impl State {
       active_selection: None,
       mouse_position: Point::new(0.0, 0.0),
       camera: camera,
+      sound_effects: SoundEffects::new(),
     }
   }
 }
@@ -232,7 +240,8 @@ where Window: piston_window::Window,
           return Err(error::Error::from("Exited Game"));
         },
         piston_window::Key::X => {
-          play_sound_effect("test");
+          // Chris why
+          //self.state.sound_effects.play("test");
         },
         piston_window::Key::LShift | piston_window::Key::RShift => {
           self.state.edit_mode = EditMode::Select;
