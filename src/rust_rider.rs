@@ -6,7 +6,6 @@ extern crate piston_window;
 extern crate find_folder;
 extern crate sprite;
 extern crate tiled;
-extern crate ai_behavior;
 extern crate gif;
 extern crate image;
 
@@ -20,16 +19,15 @@ use self::ears::{Sound, Music, AudioController};
 use std::fs::File;
 use std::path::Path;
 
-use self::ai_behavior::{
-    Action,
-    Sequence,
-    While,
-    WaitForever,
-};
-
+use assets;
 use camera;
+use entity;
+use entity::Position;
+use entity::Scaled;
+use entity::Sprited;
 use error;
 use handler;
+use hero;
 
 enum EditMode {
   Insert,
@@ -41,31 +39,8 @@ type Vector = nalgebra::Vector2<f64>;
 
 type Texture = piston_window::G2dTexture;
 
-pub struct Frame {
-    texture: Rc<Texture>,
-    frame_time: u16, // frame delay, units of 10ms
-}
 
-pub struct ImageAsset {
-    frames: Vec<Frame>,
-}
-
-impl ImageAsset {
-    fn new() -> ImageAsset {
-        ImageAsset {
-            frames: Vec::new(),
-        }
-    }
-
-    fn add_frame(&mut self, texture: Rc<Texture>, frame_time: u16) {
-        self.frames.push(Frame {
-            texture,
-            frame_time,
-        });
-    }
-}
-
-type AssetMap = HashMap<String, ImageAsset>;
+type SceneRcRef = Rc<RefCell<sprite::Scene<Texture>>>;
 
 type Scene = sprite::Scene<Texture>;
 
@@ -180,6 +155,7 @@ pub struct State {
   active_selection: Option<Point>,
   mouse_position: Point,
   camera: camera::Camera2,
+  entities: entity::EntityMap,
 }
 
 impl State {
@@ -192,6 +168,7 @@ impl State {
       active_selection: None,
       mouse_position: Point::new(0.0, 0.0),
       camera: camera,
+      entities: entity::EntityMap::new(),
     }
   }
 }
@@ -202,8 +179,8 @@ where
 {
   state: State,
   window: Rc<RefCell<piston_window::PistonWindow<Window>>>,
-  assets: AssetMap,
-  scene: Scene,
+  assets: assets::AssetMap,
+  scene: SceneRcRef,
 }
 
 /// How GameMode responds to input-events.
@@ -393,7 +370,7 @@ where Window: piston_window::OpenGLWindow,
         line.draw(&context, graphics);
       }
 
-      self.scene.draw(
+      self.scene.borrow_mut().draw(
         context.trans(-self.state.camera.position.x,
                       self.state.camera.position.y).transform,
         graphics,
@@ -408,7 +385,7 @@ fn load_assets_from_dir<Window>(
   mut window: &mut piston_window::PistonWindow<Window>,
   dir: &Path,
   prefix: &str,
-  mut assets: &mut AssetMap)
+  mut assets: &mut assets::AssetMap)
 where Window: piston_window::Window
 {
   for entry in dir.read_dir().expect("read dir call failed") {
@@ -434,7 +411,7 @@ where Window: piston_window::Window
                                       piston_window::Flip::None,
                                       &piston_window::TextureSettings::new().mag(piston_window::Filter::Nearest),
                                       ).unwrap());
-                let mut asset = ImageAsset::new();
+                let mut asset = assets::ImageAsset::new();
                 asset.add_frame(texture, 0);
                 assets.insert(name, asset);
             }
@@ -442,7 +419,7 @@ where Window: piston_window::Window
                 use self::gif::Decoder;
                 use self::gif::SetParameter;
                 println!("Loading {}", name);
-                let mut asset = ImageAsset::new();
+                let mut asset = assets::ImageAsset::new();
 
                 let mut decoder = Decoder::new(File::open(&path).expect(&format!("Could not open {:?}", &path)));
                 decoder.set(gif::ColorOutput::RGBA);
@@ -473,7 +450,7 @@ where Window: piston_window::Window
   }
 }
 
-fn load_assets<Window>(mut window: &mut piston_window::PistonWindow<Window>) -> AssetMap
+fn load_assets<Window>(mut window: &mut piston_window::PistonWindow<Window>) -> assets::AssetMap
 where Window: piston_window::Window
 {
   let mut assets = HashMap::new();
@@ -495,7 +472,7 @@ where Window: piston_window::OpenGLWindow,
     &mut self,
     _event: &Event,
   ) -> error::Result<()> {
-    self.scene.event(_event);
+    self.scene.borrow_mut().event(_event);
     Ok(())
   }
 }
@@ -520,39 +497,27 @@ where
     };
 
     let assets = load_assets(&mut window.borrow_mut());
-    let mut scene = Scene::new();
+    let mut scene = Rc::new(RefCell::new(Scene::new()));
+    let mut state = State::new(camera);
 
-    let hero_texture = assets.get(&String::from("characters/detective/Detective_idle"))
-        .expect("Could not find asset")
-        .frames.get(0).unwrap().texture.clone();
-
-    let mut hero = sprite::Sprite::from_texture(hero_texture);
-
+    // Build the default hero
     let hero_scale = 10.0;
+    let mut hero = hero::Hero::new(&assets, scene.clone());
     hero.set_position(600.0, 775.0);
-    hero.set_scale(hero_scale, hero_scale);
+    hero.set_scale(hero_scale);
 
-    let hero_id = scene.add_child(hero);
+    let hero_id = hero.get_sprite_id();
+    state.entities.insert(String::from("hero"), Rc::new(hero));
 
-    let seq = Sequence(vec![
-        While(Box::new(WaitForever), vec![
-              Action(sprite::Ease(sprite::EaseFunction::ExponentialIn, Box::new(sprite::MoveBy(3.0, 0.0, 50.0)))),
-              Action(sprite::Ease(sprite::EaseFunction::ExponentialIn, Box::new(sprite::MoveBy(3.0, 0.0, -50.0)))),
-        ]),
-        ]);
-
-    scene.run(hero_id, &seq);
-
-
-    GameMode::new_with_state(window, State::new(camera), assets, scene)
+    GameMode::new_with_state(window, state, assets, scene.clone())
   }
 
   /// Create a GameMode with an existing State.
   pub fn new_with_state(
     window: Rc<RefCell<piston_window::PistonWindow<Window>>>,
     state: State,
-    assets: AssetMap,
-    scene: Scene,
+    assets: assets::AssetMap,
+    scene: SceneRcRef,
   ) -> GameMode<Window> {
     GameMode {
       window: window,
