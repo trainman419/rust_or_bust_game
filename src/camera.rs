@@ -1,15 +1,15 @@
 extern crate nalgebra;
 extern crate piston_window;
 
-pub type ScreenPoint = nalgebra::Point2<u32>;
-pub type ScreenVector = nalgebra::Vector2<u32>;
-pub type WorldPoint = nalgebra::Point2<f64>;
-pub type WorldVector = nalgebra::Vector2<f64>;
+pub type ScreenPoint2 = nalgebra::Point2<u32>;
+pub type ScreenVector2 = nalgebra::Vector2<u32>;
+pub type WorldPoint2 = nalgebra::Point2<f64>;
+pub type WorldVector2 = nalgebra::Vector2<f64>;
 
 pub struct Camera2 {
-  pub viewport: WorldVector,
-  pub position: WorldPoint,
-  pub velocity: WorldVector,
+  pub viewport: WorldVector2,
+  pub position: WorldPoint2,
+  pub velocity: WorldVector2,
 }
 
 impl Camera2 {

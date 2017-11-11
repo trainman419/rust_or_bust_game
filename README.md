@@ -27,6 +27,20 @@ git clone git@github.com:chpatton013/piston.git ~/forks/piston
 echo 'paths = ["forks/piston"]' > ~/.cargo/config
 ```
 
+#### Ubuntu
+
+```
+sudo apt-get install libopenal-dev
+sudo apt-get install libsndfile1-dev 
+```
+
+#### OSX
+
+```
+brew install openal-soft libsndfile
+```
+
+
 ### Build
 
 ```

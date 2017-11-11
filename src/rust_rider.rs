@@ -115,35 +115,41 @@ const GREEN: piston_window::types::Color = [0.0, 1.0, 0.0, 1.0];
 const BLUE:  piston_window::types::Color = [0.0, 0.0, 1.0, 1.0];
 
 pub struct SoundEffects {
-  music: thread::JoinHandle<()>,
+  music: Option<thread::JoinHandle<()>>,
   sounds: Vec<thread::JoinHandle<()>>,
 }
 
 impl SoundEffects {
-}
-
-fn play_sound_effect(file: &str) {
-  let mut path = String::from("assets/sounds/effects/");
-  let mut filename = "";
-
-  match file {
-    "test" => filename = "bullet-shell.wav",
-    _ => {}
-  }
-
-  if (filename == "") {
-    println!("Could not find file");
-    return ();
-  }
-
-  path.push_str(filename);
-  let handle = thread::spawn(move || {
-    let mut sound = Sound::new(&path).unwrap();
-    sound.play();
-    while sound.is_playing() {
-      // Todo: Maybe something here
+  pub fn new() -> SoundEffects {
+    SoundEffects {
+      music: None,
+      sounds: Vec::new(),
     }
-  });
+  }
+
+  pub fn play(&self, file: &str) {
+    let mut path = String::from("assets/sounds/effects/");
+    let mut filename = "";
+
+    match file {
+      "test" => filename = "bullet-shell.wav",
+      _ => {}
+    }
+
+    if filename == "" {
+      println!("Could not find file");
+      return ();
+    }
+
+    path.push_str(filename);
+    let handle = thread::spawn(move || {
+      let mut sound = Sound::new(&path).unwrap();
+      sound.play();
+      while sound.is_playing() {
+        // Todo: Maybe something here
+      }
+    });
+  }
 }
 
 /// The game-ion of the Rust Rider game. The state should act as the save data
@@ -156,6 +162,7 @@ pub struct State {
   mouse_position: Point,
   camera: camera::Camera2,
   entities: entity::EntityMap,
+  sound_effects: SoundEffects,
 }
 
 impl State {
@@ -169,6 +176,7 @@ impl State {
       mouse_position: Point::new(0.0, 0.0),
       camera: camera,
       entities: entity::EntityMap::new(),
+      sound_effects: SoundEffects::new(),
     }
   }
 }
@@ -209,7 +217,7 @@ where Window: piston_window::Window,
           return Err(error::Error::from("Exited Game"));
         },
         piston_window::Key::X => {
-          play_sound_effect("test");
+          self.state.sound_effects.play("test");
         },
         piston_window::Key::LShift | piston_window::Key::RShift => {
           self.state.edit_mode = EditMode::Select;
@@ -402,48 +410,50 @@ where Window: piston_window::Window
       } else if entry.file_type().unwrap().is_file() {
         let path = entry.path();
         let name = prefix.to_owned() + "/" + path.file_stem().unwrap().to_str().unwrap();
-        match path.extension().unwrap().to_str().unwrap() {
-            "png" => {
-                println!("Loading {}", name);
-                let texture = Rc::new(piston_window::Texture::from_path(
-                                      &mut window.factory,
-                                      path,
-                                      piston_window::Flip::None,
-                                      &piston_window::TextureSettings::new().mag(piston_window::Filter::Nearest),
-                                      ).unwrap());
-                let mut asset = assets::ImageAsset::new();
-                asset.add_frame(texture, 0);
-                assets.insert(name, asset);
-            }
-            "gif" => {
-                use self::gif::Decoder;
-                use self::gif::SetParameter;
-                println!("Loading {}", name);
-                let mut asset = assets::ImageAsset::new();
+        if let Some(extension) = entry.path().extension() {
+          match extension.to_str().unwrap() {
+              "png" => {
+                  println!("Loading {}", name);
+                  let texture = Rc::new(piston_window::Texture::from_path(
+                                        &mut window.factory,
+                                        path,
+                                        piston_window::Flip::None,
+                                        &piston_window::TextureSettings::new().mag(piston_window::Filter::Nearest),
+                                        ).unwrap());
+                  let mut asset = assets::ImageAsset::new();
+                  asset.add_frame(texture, 0);
+                  assets.insert(name, asset);
+              }
+              "gif" => {
+                  use self::gif::Decoder;
+                  use self::gif::SetParameter;
+                  println!("Loading {}", name);
+                  let mut asset = assets::ImageAsset::new();
 
-                let mut decoder = Decoder::new(File::open(&path).expect(&format!("Could not open {:?}", &path)));
-                decoder.set(gif::ColorOutput::RGBA);
-                let mut decoder = decoder.read_info().expect(&format!("Could not decode gif {:?}", &path));
+                  let mut decoder = Decoder::new(File::open(&path).expect(&format!("Could not open {:?}", &path)));
+                  decoder.set(gif::ColorOutput::RGBA);
+                  let mut decoder = decoder.read_info().expect(&format!("Could not decode gif {:?}", &path));
 
-                let size = (decoder.width() as u32, decoder.height() as u32);
-                let frame_size = (size.0 * size.1 * 4) as usize;
-                while let Some(frame) = decoder.read_next_frame().expect(&format!("Could not read next frame from {:?}", &path)) {
-                    use self::image::GenericImage;
-                    let cur_frame = vec![0u8; frame_size];
-                    let src = image::ImageBuffer::<image::Rgba<u8>, Vec<u8>>::from_raw(frame.width as u32, frame.height as u32, frame.buffer.clone().into_owned()).expect("Could not create source image (source too small?)");
-                    let mut dst = image::ImageBuffer::<image::Rgba<u8>, Vec<u8>>::from_raw(size.0, size.1, cur_frame).expect("Could not create destination image buffer");
-                    dst.copy_from(&src, frame.left as u32, frame.top as u32);
+                  let size = (decoder.width() as u32, decoder.height() as u32);
+                  let frame_size = (size.0 * size.1 * 4) as usize;
+                  while let Some(frame) = decoder.read_next_frame().expect(&format!("Could not read next frame from {:?}", &path)) {
+                      use self::image::GenericImage;
+                      let cur_frame = vec![0u8; frame_size];
+                      let src = image::ImageBuffer::<image::Rgba<u8>, Vec<u8>>::from_raw(frame.width as u32, frame.height as u32, frame.buffer.clone().into_owned()).expect("Could not create source image (source too small?)");
+                      let mut dst = image::ImageBuffer::<image::Rgba<u8>, Vec<u8>>::from_raw(size.0, size.1, cur_frame).expect("Could not create destination image buffer");
+                      dst.copy_from(&src, frame.left as u32, frame.top as u32);
 
-                    let texture = Rc::new(piston_window::Texture::from_image(
-                                          &mut window.factory,
-                                          &dst,
-                                          &piston_window::TextureSettings::new().mag(piston_window::Filter::Nearest),
-                                          ).expect("Could not create Texture"));
-                    asset.add_frame(texture, frame.delay);
-                }
-                assets.insert(name, asset);
-            }
-            _ => (),
+                      let texture = Rc::new(piston_window::Texture::from_image(
+                                            &mut window.factory,
+                                            &dst,
+                                            &piston_window::TextureSettings::new().mag(piston_window::Filter::Nearest),
+                                            ).expect("Could not create Texture"));
+                      asset.add_frame(texture, frame.delay);
+                  }
+                  assets.insert(name, asset);
+              }
+              _ => (),
+          }
         }
       }
     }
@@ -470,9 +480,9 @@ where Window: piston_window::OpenGLWindow,
 {
   fn before_event<Event: piston_window::GenericEvent>(
     &mut self,
-    _event: &Event,
+    event: &Event,
   ) -> error::Result<()> {
-    self.scene.borrow_mut().event(_event);
+    self.scene.borrow_mut().event(event);
     Ok(())
   }
 }
@@ -487,13 +497,13 @@ where
   ) -> GameMode<Window> {
     use piston_window::Window; // size
     let window_size = window.borrow().size();
-    let viewport = camera::WorldVector::new(window_size.width as f64,
-                                            window_size.height as f64);
+    let viewport = camera::WorldVector2::new(window_size.width as f64,
+                                             window_size.height as f64);
 
     let camera = camera::Camera2 {
       viewport: viewport,
-      position: camera::WorldPoint::new(0.0, 0.0),
-      velocity: camera::WorldVector::new(0.0, 0.0),
+      position: camera::WorldPoint2::new(0.0, 0.0),
+      velocity: camera::WorldVector2::new(0.0, 0.0),
     };
 
     let assets = load_assets(&mut window.borrow_mut());
