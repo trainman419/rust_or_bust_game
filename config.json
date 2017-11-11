@@ -10,7 +10,7 @@
     "vsync": false,
     "srgb": false,
     "resizable": false,
-    "decorated": false
+    "decorated": true
   },
   "event": {
     "max_fps": 60,
