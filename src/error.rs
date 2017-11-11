@@ -7,6 +7,6 @@ error_chain!{
   foreign_links {
     SerdeJson(serde_json::error::Error);
     StdFmt(std::fmt::Error);
-    StdIo(std::io::Error) #[cfg(unix)];
+    StdIo(std::io::Error);
   }
 }
