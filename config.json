@@ -8,7 +8,7 @@
     "samples": 0,
     "fullscreen": false,
     "exit_on_esc": true,
-    "vsync": false,
+    "vsync": true,
     "srgb": true,
     "resizable": false,
     "decorated": true

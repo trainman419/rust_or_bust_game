@@ -21,6 +21,9 @@ use level;
 type Texture = piston_window::G2dTexture;
 type SceneRcRef = Rc<RefCell<sprite::Scene<Texture>>>;
 
+const INVISIBLE_OPACITY: f32 = 0.4;
+const INVISIBLE_SCALE_FACTOR: f64 = 0.8;
+
 
 pub struct Hero {
   name: String,
@@ -36,6 +39,7 @@ pub struct Hero {
   state: String,
   frame: usize,
   next_frame: f64,
+  is_invisible: bool,
 }
 
 
@@ -81,6 +85,7 @@ impl Hero {
       state,
       frame,
       next_frame,
+      is_invisible: false,
     }
   }
 }
@@ -183,6 +188,26 @@ impl entity::Actor for Hero {
       }
     }
 
+    Ok(())
+  }
+
+  fn turn_invisible(&mut self) -> error::Result<()> {
+    self.is_invisible = true;
+    if let Some(sprite) = self.scene.borrow_mut().child_mut(self.sprite_id) {
+      sprite.set_opacity(INVISIBLE_OPACITY);
+      let current_scale = sprite.get_scale();
+      sprite.set_scale(current_scale.0 * INVISIBLE_SCALE_FACTOR,
+                       current_scale.1 * INVISIBLE_SCALE_FACTOR);
+    }
+    Ok(())
+  }
+
+  fn unturn_invisible(&mut self) -> error::Result<()> {
+    self.is_invisible = false;
+    if let Some(sprite) = self.scene.borrow_mut().child_mut(self.sprite_id) {
+      sprite.set_opacity(1.0);
+      sprite.set_scale(self.scale, self.scale);
+    }
     Ok(())
   }
 

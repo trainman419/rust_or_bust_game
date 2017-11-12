@@ -176,6 +176,14 @@ impl entity::Actor for Detective {
     Ok(())
   }
 
+  fn turn_invisible(&mut self) -> error::Result<()> {
+    Ok(())
+  }
+
+  fn unturn_invisible(&mut self) -> error::Result<()> {
+    Ok(())
+  }
+
   fn interact_hero(&mut self) {
     println!("Hero interacted with Detective!");
   }

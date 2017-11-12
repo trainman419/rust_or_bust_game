@@ -177,6 +177,11 @@ where Window: piston_window::Window,
             hero.borrow_mut().set_velocity(velocity)?;
           }
         },
+        piston_window::Key::LShift => {
+          if let Some(hero) = self.state.entities.get("hero") {
+            hero.borrow_mut().turn_invisible()?;
+          }
+        },
         _ => {},
       },
       _ => {},
@@ -197,6 +202,11 @@ where Window: piston_window::Window,
             let mut velocity = hero.borrow().velocity();
             velocity.x = 0.0;
             hero.borrow_mut().set_velocity(velocity)?;
+          }
+        },
+        piston_window::Key::LShift => {
+          if let Some(hero) = self.state.entities.get("hero") {
+            hero.borrow_mut().unturn_invisible()?;
           }
         },
         _ => {},

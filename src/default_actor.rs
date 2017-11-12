@@ -122,6 +122,14 @@ impl entity::Actor for DefaultActor {
     Ok(())
   }
 
+  fn turn_invisible(&mut self) -> error::Result<()> {
+    Ok(())
+  }
+
+  fn unturn_invisible(&mut self) -> error::Result<()> {
+    Ok(())
+  }
+
   fn interact_hero(&mut self) {
   }
 
