@@ -1,0 +1,38 @@
+{
+  "world_bounds": [
+    {
+      "x": 0,
+      "y": 0
+    },
+    {
+      "x": 800,
+      "y": 600
+    }
+  ],
+  "actors": [
+    {
+      "name": "background",
+      "image": "characters/ferris/ferris-happy",
+      "position": {"x": 0, "y": 0},
+      "scale": 1,
+      "visible": true,
+      "active": false
+    },
+    {
+      "name": "hero",
+      "image": "characters/hero/ghost_idle",
+      "position": {"x": 800, "y": 700},
+      "scale": 10,
+      "visible": true,
+      "active": true
+    },
+    {
+      "name": "detective",
+      "image": "characters/detective/Detective_idle",
+      "position": {"x": 500, "y": 700},
+      "scale": 10,
+      "visible": true,
+      "active": true
+    }
+  ]
+}

@@ -27,6 +27,7 @@ mod config;
 mod detective;
 mod entity;
 mod error;
+mod level;
 mod handler;
 mod hero;
 mod item;
