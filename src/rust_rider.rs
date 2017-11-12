@@ -14,6 +14,7 @@ use std::cell::RefCell;
 use std::rc::Rc;
 use std::collections::HashMap;
 use std::thread;
+use std::time;
 
 #[cfg(unix)]
 use self::ears::{Sound, Music, AudioController};
@@ -80,7 +81,7 @@ impl SoundEffects {
           music.set_volume(0.25);
           music.play();
           while music.is_playing() {
-            thread::sleep_ms(1000);
+            thread::sleep(time::Duration::from_secs(1));
             // Todo: Maybe something here
           }
         });
