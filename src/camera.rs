@@ -18,9 +18,4 @@ impl Camera2 {
       velocity: WorldVector2::new(0.0, 0.0),
     }
   }
-
-  pub fn on_update(&mut self, update_args: &piston_window::UpdateArgs) {
-    let new_position = self.position + self.velocity * update_args.dt;
-    self.position = new_position;
-  }
 }

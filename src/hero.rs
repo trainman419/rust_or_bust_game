@@ -162,9 +162,9 @@ impl entity::Actor for Hero {
     Ok(())
   }
 
-  fn on_update(&mut self, update_args: &piston_window::UpdateArgs) {
+  fn on_update(&mut self, update_args: &piston_window::UpdateArgs) -> error::Result<()> {
     let new_position = self.position + self.velocity * update_args.dt;
-    self.position = new_position;
+    self.set_position(new_position)?;
 
     // update time to next frame
     self.next_frame -= update_args.dt;
@@ -190,6 +190,8 @@ impl entity::Actor for Hero {
           sprite.set_texture(frame.texture.clone());
       }
     }
+
+    Ok(())
   }
 
   fn interact_hero(&mut self) {

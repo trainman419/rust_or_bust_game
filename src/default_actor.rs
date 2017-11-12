@@ -120,7 +120,10 @@ impl entity::Actor for DefaultActor {
     Ok(())
   }
 
-  fn on_update(&mut self, update_args: &piston_window::UpdateArgs) {
+  fn on_update(&mut self, update_args: &piston_window::UpdateArgs) -> error::Result<()> {
+    let new_position = self.position + self.velocity * update_args.dt;
+    self.set_position(new_position)?;
+    Ok(())
   }
 
   fn interact_hero(&mut self) {

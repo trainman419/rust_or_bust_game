@@ -32,18 +32,13 @@ use hero;
 use level;
 
 type Texture = piston_window::G2dTexture;
-
-
 type SceneRcRef = Rc<RefCell<sprite::Scene<Texture>>>;
-
 type Scene = sprite::Scene<Texture>;
 
 pub struct SoundEffects {
   music: Option<thread::JoinHandle<()>>,
   sounds: Vec<thread::JoinHandle<()>>,
 }
-
-
 
 impl SoundEffects {
   pub fn new() -> SoundEffects {
@@ -172,10 +167,18 @@ where Window: piston_window::Window,
         },
         // TODO: these should come from config.
         piston_window::Key::Left => {
-          self.state.camera.velocity.x = -500.0;
+          if let Some(hero) = self.state.entities.get("hero") {
+            let mut velocity = hero.borrow().velocity();
+            velocity.x = -500.0;
+            hero.borrow_mut().set_velocity(velocity)?;
+          }
         },
         piston_window::Key::Right => {
-          self.state.camera.velocity.x = 500.0;
+          if let Some(hero) = self.state.entities.get("hero") {
+            let mut velocity = hero.borrow().velocity();
+            velocity.x = 500.0;
+            hero.borrow_mut().set_velocity(velocity)?;
+          }
         },
         _ => {},
       },
@@ -192,11 +195,12 @@ where Window: piston_window::Window,
   ) -> error::Result<()> {
     match button {
       &piston_window::Button::Keyboard(key) => match key {
-        piston_window::Key::Left => {
-          self.state.camera.velocity.x = 0.0;
-        },
-        piston_window::Key::Right => {
-          self.state.camera.velocity.x = 0.0;
+        piston_window::Key::Left | piston_window::Key::Right => {
+          if let Some(hero) = self.state.entities.get("hero") {
+            let mut velocity = hero.borrow().velocity();
+            velocity.x = 0.0;
+            hero.borrow_mut().set_velocity(velocity)?;
+          }
         },
         _ => {},
       },
@@ -219,6 +223,9 @@ where Window: piston_window::Window,
     for (ref _name, ref entity) in self.state.entities.iter() {
       entity.borrow_mut().on_update(update_args);
     }
+    if let Some(hero) = self.state.entities.get("hero") {
+      self.state.camera.position.x = hero.borrow().position().x;
+    }
 
     Ok(())
   }
@@ -233,12 +240,20 @@ where Window: piston_window::OpenGLWindow,
     event: &Event,
     _render_args: &piston_window::RenderArgs,
   ) -> error::Result<()> {
+    use piston_window::Window; // size
     use self::graphics::Transformed; // piston_window::Context.{trans,orient}
+
+    // Borrow member references immutably before allowing self to be borrowed
+    // mutably by self.window.draw_2d().
+    let window_size = self.window.borrow().size();
 
     self.window.borrow_mut().draw_2d(event, |context, graphics| {
       let translation = self.state.camera.position;
       let transform = context
-        .trans(-translation.x, translation.y)
+        .trans(
+          window_size.width as f64 - translation.x,
+          window_size.height as f64 * 0.5 + translation.y,
+        )
         .zoom(self.state.camera.zoom)
         .transform;
 
@@ -376,8 +391,7 @@ where
     window: Rc<RefCell<piston_window::PistonWindow<Window>>>,
   ) -> GameMode<Window> {
     // TODO: should be loaded as an actor from level
-    let mut camera = camera::Camera2::new();
-    camera.position.y = 800.0;
+    let camera = camera::Camera2::new();
 
     let assets = load_assets(&mut window.borrow_mut());
 
