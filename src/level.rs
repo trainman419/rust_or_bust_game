@@ -16,6 +16,7 @@ pub struct Actor {
   pub sound: String,
   pub position: Point,
   pub scale: f64,
+  pub width: u32,
   pub visible: bool,
   #[serde(default)]
   pub active: bool,
@@ -32,6 +33,7 @@ pub struct Detective {
   pub clue_sound: String,
   pub position: Point,
   pub scale: f64,
+  pub width: u32,
   pub speed: f64,
 }
 

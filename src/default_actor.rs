@@ -17,6 +17,7 @@ pub struct DefaultActor {
   position: entity::WorldPoint2,
   velocity: entity::WorldVector2,
   scale: f64,
+  width: f64,
   visible: bool,
   active: bool,
   sprite_id: uuid::Uuid,
@@ -52,6 +53,7 @@ impl DefaultActor {
       position: entity::WorldPoint2::new(actor.position.x, actor.position.y),
       velocity: entity::WorldVector2::new(0.0, 0.0),
       scale: actor.scale,
+      width: (actor.width as f64) * actor.scale,
       visible: actor.visible,
       active: actor.active,
       sprite_id: id,
@@ -94,6 +96,10 @@ impl entity::Actor for DefaultActor {
 
   fn sprite_id(&self) -> uuid::Uuid {
     self.sprite_id
+  }
+
+  fn width(&self) -> f64 {
+    self.width
   }
 
   fn bb(&self) -> graphics::types::Rectangle {

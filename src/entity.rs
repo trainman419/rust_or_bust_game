@@ -24,6 +24,7 @@ pub trait Actor {
   fn visible(&self) -> bool;
   fn active(&self) -> bool;
   fn sprite_id(&self) -> uuid::Uuid;
+  fn width(&self) -> f64;
 
   fn bb(&self) -> graphics::types::Rectangle;
 
@@ -45,12 +46,17 @@ pub trait Actor {
 
   fn overlap(&self, other: &Actor) -> bool {
     let r1 = self.bb();
+    let r1_hw = self.width() / 2.0;
     let r2 = other.bb();
+    let r2_hw = other.width() / 2.0;
 
-    let r1_xmin = r1[0];
-    let r1_xmax = r1[0] + r1[2];
-    let r2_xmin = r2[0];
-    let r2_xmax = r2[0] + r2[2];
+    let r1_x = (r1[0] + r1[2]) / 2.0;
+    let r1_xmin = r1_x - r1_hw;
+    let r1_xmax = r1_x + r1_hw;
+
+    let r2_x = (r2[0] + r2[2]) / 2.0;
+    let r2_xmin = r2_x - r2_hw;
+    let r2_xmax = r2_x + r2_hw;
 
     if r1_xmax < r2_xmin {
       false

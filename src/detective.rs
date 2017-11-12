@@ -29,6 +29,7 @@ pub struct Detective {
   velocity: entity::WorldVector2,
   scale: f64,
   speed: f64,
+  width: f64,
   visible: bool,
   active: bool,
   sprite_id: uuid::Uuid,
@@ -83,6 +84,7 @@ impl Detective {
       position: entity::WorldPoint2::new(actor.position.x, actor.position.y),
       velocity: entity::WorldVector2::new(0.0, 0.0),
       scale: actor.scale,
+      width: (actor.width as f64) * actor.scale,
       speed: actor.speed,
       visible: true,
       active: true,
@@ -94,8 +96,8 @@ impl Detective {
       clue_sound: actor.clue_sound.to_owned(),
       frame,
       next_frame,
-      state: DetectiveState::Walk,
-      next_state: DetectiveState::Walk,
+      state: DetectiveState::Idle,
+      next_state: DetectiveState::Idle,
     }
   }
 
@@ -106,7 +108,7 @@ impl Detective {
     //    - if this is the macguffin, trigger level completion
     //    - if this isn't the macguffin, detective continues moving
     if actor.active() {
-      println!("Detective interacted with {}!", actor.name());
+      //println!("Detective interacted with {}!", actor.name());
     }
   }
 }
@@ -139,6 +141,10 @@ impl entity::Actor for Detective {
 
   fn sprite_id(&self) -> uuid::Uuid {
     self.sprite_id
+  }
+
+  fn width(&self) -> f64 {
+    self.width
   }
 
   fn bb(&self) -> graphics::types::Rectangle {
