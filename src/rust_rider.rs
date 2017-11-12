@@ -9,6 +9,7 @@ extern crate sprite;
 
 use std::cell::RefCell;
 use std::rc::Rc;
+use std::ops::Deref;
 use std::thread;
 use std::time;
 
@@ -195,6 +196,15 @@ where Window: piston_window::Window,
           let mut hero = self.state.get_hero();
           hero.borrow_mut().turn_invisible()?;
         },
+        piston_window::Key::Space => {
+          let mut hero = self.state.get_hero();
+          for (ref _name, ref entity) in self.state.entities.iter() {
+            if entity.borrow().overlap(&*hero.borrow()) {
+              println!("Hero interacting with {}", entity.borrow().name());
+              entity.borrow_mut().interact_hero();
+            }
+          }
+        }
         _ => {},
       },
       _ => {},

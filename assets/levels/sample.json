@@ -47,6 +47,15 @@
       "visible": true,
       "active": false,
       "reversible": false
+    },
+    {
+      "name": "cairn",
+      "image": "objects/cairn/cairn_fall",
+      "position": {"x": 850, "y": 300},
+      "scale": 10,
+      "visible": true,
+      "active": false,
+      "reversible": false
     }
   ]
 }

@@ -1,6 +1,7 @@
 extern crate piston_window;
 extern crate sprite;
 extern crate uuid;
+extern crate graphics;
 
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -88,6 +89,10 @@ impl entity::Actor for DefaultActor {
     self.sprite_id
   }
 
+  fn bb(&self) -> graphics::types::Rectangle {
+    self.scene.borrow_mut().child_mut(self.sprite_id).unwrap().bounding_box()
+  }
+
   fn set_position(&mut self, position: entity::WorldPoint2) -> error::Result<()> {
     self.position = position;
     if let Some(sprite) = self.scene.borrow_mut().child_mut(self.sprite_id) {
@@ -162,6 +167,7 @@ impl entity::Actor for DefaultActor {
   }
 
   fn interact_hero(&mut self) {
+    self.animating = true;
   }
 
   fn interact_detective(&mut self) {

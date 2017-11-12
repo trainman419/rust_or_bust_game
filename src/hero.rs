@@ -2,6 +2,7 @@ extern crate ai_behavior;
 extern crate piston_window;
 extern crate sprite;
 extern crate uuid;
+extern crate graphics;
 
 //use self::ai_behavior::{
 //    Action,
@@ -133,6 +134,10 @@ impl entity::Actor for Hero {
 
   fn sprite_id(&self) -> uuid::Uuid {
     self.sprite_id
+  }
+
+  fn bb(&self) -> graphics::types::Rectangle {
+    self.scene.borrow_mut().child_mut(self.sprite_id).unwrap().bounding_box()
   }
 
   fn set_position(&mut self, position: entity::WorldPoint2) -> error::Result<()> {

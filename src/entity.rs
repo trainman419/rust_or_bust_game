@@ -1,6 +1,8 @@
 extern crate nalgebra;
 extern crate piston_window;
 extern crate uuid;
+extern crate ncollide;
+extern crate graphics;
 
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -22,6 +24,8 @@ pub trait Actor {
   fn active(&self) -> bool;
   fn sprite_id(&self) -> uuid::Uuid;
 
+  fn bb(&self) -> graphics::types::Rectangle;
+
   fn set_position(&mut self, position: WorldPoint2) -> error::Result<()>;
   fn set_velocity(&mut self, velocity: WorldVector2) -> error::Result<()>;
   fn set_scale(&mut self, scale: f64) -> error::Result<()>;
@@ -36,5 +40,23 @@ pub trait Actor {
 
   fn interact_detective(&mut self) {
     // What happens when this object interacts with the detective
+  }
+
+  fn overlap(&self, other: &Actor) -> bool {
+    let r1 = self.bb();
+    let r2 = other.bb();
+
+    let r1_xmin = r1[0];
+    let r1_xmax = r1[0] + r1[2];
+    let r2_xmin = r2[0];
+    let r2_xmax = r2[0] + r2[2];
+
+    if r1_xmax < r2_xmin {
+      false
+    } else if r2_xmax < r1_xmin {
+      false
+    } else {
+      true
+    }
   }
 }
