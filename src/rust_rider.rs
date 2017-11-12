@@ -407,8 +407,8 @@ where
     sound_effects: SoundEffects,
   ) -> GameMode<Window> {
     GameMode {
-      window: window,
-      state: state,
+      window,
+      state,
       assets,
       scene,
       sound_effects,
