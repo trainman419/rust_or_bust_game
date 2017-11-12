@@ -162,13 +162,16 @@ impl entity::Actor for DefaultActor {
         if ! self.state {
           self.frame += 1;
         } else {
-          self.frame -= 1;
+          if self.frame > 0 {
+            self.frame -= 1;
+          }
         }
 
         // If this is the last frame, stop animation
         if self.frame + 1 >= asset.frames.len() || self.frame <= 0 {
           self.animating = false;
           self.state = !self.state;
+          self.active = !self.active;
         }
 
         // Clamp frame number to within bounds
