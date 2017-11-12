@@ -31,14 +31,6 @@ use handler;
 use hero;
 use level;
 
-enum EditMode {
-  Insert,
-  Select,
-}
-
-type Point = nalgebra::Point2<f64>;
-type Vector = nalgebra::Vector2<f64>;
-
 type Texture = piston_window::G2dTexture;
 
 
@@ -97,7 +89,7 @@ impl SoundEffects {
     let mut path = String::from("assets/sounds/effects/");
     let mut filename = "";
     let mut max_length = 0;
-    let mut volume = 1.0;
+    let volume = 1.0;
 
     match file {
       "cans" => {
@@ -124,7 +116,7 @@ impl SoundEffects {
         sound.set_volume(volume);
         sound.play();
         if max_length > 0 {
-            thread::sleep_ms(max_length);
+            thread::sleep(time::Duration::from_millis(max_length));
         } else {
            while sound.is_playing() { }
         }
@@ -239,12 +231,7 @@ where Window: piston_window::OpenGLWindow,
     event: &Event,
     _render_args: &piston_window::RenderArgs,
   ) -> error::Result<()> {
-    use piston_window::Window; // size
     use self::graphics::Transformed; // piston_window::Context.{trans,orient}
-
-    // Borrow member references immutably before allowing self to be borrowed
-    // mutably by self.window.draw_2d().
-    let state = &self.state;
 
     self.window.borrow_mut().draw_2d(event, |context, graphics| {
       let translation = self.state.camera.position;

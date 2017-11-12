@@ -42,9 +42,4 @@ impl Level {
     let config = serde_json::from_reader(file)?;
     Ok(config)
   }
-
-  pub fn from_json_str(json_str: &str) -> error::Result<Level> {
-    let config = serde_json::from_str(json_str)?;
-    Ok(config)
-  }
 }

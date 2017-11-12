@@ -44,38 +44,8 @@ where
     }
   }
 
-  pub fn remove_application_mode(
-    &mut self,
-    name: &str,
-  ) -> error::Result<Box<EventHandler>> {
-    match self.active_application_mode {
-      Some(ref mut active_name) => {
-        if name == active_name {
-          return Err(error::Error::from(
-              format!("Application mode {} is currently active", name),
-              ));
-        }
-      },
-      None => {},
-    }
-
-    match self.application_modes.remove(name) {
-      Some(application_mode) => Ok(application_mode),
-      None => Err(error::Error::from(
-          format!("Application mode {} does not exist", name),
-          )),
-    }
-  }
-
   pub fn get_application_mode(&self, name: &str) -> Option<&Box<EventHandler>> {
     self.application_modes.get(name)
-  }
-
-  pub fn get_active_application_mode(&self) -> Option<&Box<EventHandler>> {
-    match self.active_application_mode.to_owned() {
-      Some(active_name) => self.get_application_mode(&active_name),
-      None => None,
-    }
   }
 
   pub fn get_application_mode_mut(
