@@ -138,8 +138,10 @@ impl entity::Actor for Hero {
 
   fn set_velocity(&mut self, velocity: entity::WorldVector2) -> error::Result<()> {
     self.velocity = velocity;
-    if let Some(sprite) = self.scene.borrow_mut().child_mut(self.sprite_id) {
-      sprite.set_flip_x(self.velocity.x < 0.0);
+    if self.velocity.x != 0.0 {
+        if let Some(sprite) = self.scene.borrow_mut().child_mut(self.sprite_id) {
+          sprite.set_flip_x(self.velocity.x < 0.0);
+        }
     }
     Ok(())
   }
