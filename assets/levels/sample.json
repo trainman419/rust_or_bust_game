@@ -12,6 +12,7 @@
   "hero": {
       "name": "hero",
       "image": "characters/hero/ghost_idle",
+      "sound": "",
       "position": {"x": 200, "y": 300},
       "scale": 10,
       "visible": true,
@@ -59,6 +60,16 @@
       "visible": true,
       "active": false,
       "reversible": false
+    },
+    {
+      "name": "cairn2",
+      "image": "objects/cairn/cairn_fall",
+      "sound": "rocks",
+      "position": {"x": 2500, "y": 300},
+      "scale": 10,
+      "visible": true,
+      "active": false,
+      "reversible": true
     }
   ]
 }

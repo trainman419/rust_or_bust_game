@@ -22,9 +22,12 @@ pub struct DefaultActor {
   sprite_id: uuid::Uuid,
   scene: Rc<RefCell<sprite::Scene<piston_window::G2dTexture>>>,
   asset: Rc<assets::ImageAsset>,
+  sound: String,
   animating: bool,
   frame: usize,
   next_frame: f64,
+  reversible: bool,
+  state: bool,
 }
 
 impl DefaultActor {
@@ -54,9 +57,12 @@ impl DefaultActor {
       sprite_id: id,
       scene: scene,
       asset: asset.clone(),
+      sound: actor.sound.to_owned(),
       animating: false,
       frame: 0,
       next_frame: 0.0,
+      reversible: actor.reversible,
+      state: false,
     }
   }
 }
@@ -141,17 +147,26 @@ impl entity::Actor for DefaultActor {
         let asset = &self.asset;
 
         // get the index of the next frame
-        self.frame += 1;
+        if ! self.state {
+          self.frame += 1;
+        } else {
+          self.frame -= 1;
+        }
 
         // If this is the last frame, stop animation
-        if self.frame + 1 >= asset.frames.len() {
+        if self.frame + 1 >= asset.frames.len() || self.frame <= 0 {
           self.animating = false;
+          self.state = !self.state;
         }
 
         // Clamp frame number to within bounds
         if self.frame >= asset.frames.len() {
           self.frame = asset.frames.len() - 1;
         }
+        if self.frame < 0 {
+          self.frame = 0;
+        }
+
 
         //// Get the next frame
         let frame = asset.frames.get(self.frame).unwrap();
@@ -168,7 +183,12 @@ impl entity::Actor for DefaultActor {
   }
 
   fn interact_hero(&mut self, sounds: &mut sound::SoundEffects) {
-    self.animating = true;
+    if ! self.animating {
+      if ! self.state || self.reversible {
+        self.animating = true;
+        sounds.play(&self.sound);
+      }
+    }
   }
 
   fn interact_detective(&mut self) {
