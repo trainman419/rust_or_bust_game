@@ -272,7 +272,7 @@ fn make_actor(
 }
 
 fn make_hero(
-  actor: &level::Actor,
+  actor: &level::Hero,
   assets: &assets::AssetMap,
   scene: SceneRcRef,
 ) -> hero::HeroRcRef {

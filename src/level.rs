@@ -10,6 +10,10 @@ pub struct Point {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+pub enum ActorType {
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Actor {
   pub name: String,
   pub image: String,
@@ -22,6 +26,16 @@ pub struct Actor {
   pub active: bool,
   #[serde(default)]
   pub reversible: bool,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct Hero {
+  pub name: String,
+  pub image: String,
+  pub sound: String,
+  pub position: Point,
+  pub scale: f64,
+  pub width: u32,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -47,7 +61,7 @@ pub struct Trigger {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Level {
   pub world_bounds: (Point, Point),
-  pub hero: Actor,
+  pub hero: Hero,
   pub detective: Detective,
   pub actors: Vec<Actor>,
 }
