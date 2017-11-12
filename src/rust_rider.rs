@@ -98,7 +98,7 @@ where Window: piston_window::Window,
         },
         piston_window::Key::LShift => {
           let mut hero = self.state.get_hero();
-          hero.borrow_mut().turn_invisible()?;
+          hero.borrow_mut().turn_visible()?;
         },
         piston_window::Key::Space => {
           let mut hero = self.state.get_hero();
@@ -132,7 +132,7 @@ where Window: piston_window::Window,
         },
         piston_window::Key::LShift => {
           let mut hero = self.state.get_hero();
-          hero.borrow_mut().unturn_invisible()?;
+          hero.borrow_mut().turn_invisible()?;
         },
         _ => {},
       },

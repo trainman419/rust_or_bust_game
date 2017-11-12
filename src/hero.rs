@@ -68,6 +68,7 @@ impl Hero {
 
     hero_sprite.set_position(actor.position.x, actor.position.y);
     hero_sprite.set_scale(actor.scale, actor.scale);
+    hero_sprite.set_opacity(INVISIBLE_OPACITY);
 
     let hero_id: uuid::Uuid = scene.borrow_mut().add_child(hero_sprite);
 
@@ -84,7 +85,7 @@ impl Hero {
       idle: hero_idle.clone(),
       frame,
       next_frame,
-      is_invisible: false,
+      is_invisible: true,
     }
   }
 
@@ -99,7 +100,7 @@ impl Hero {
     Ok(())
   }
 
-  pub fn unturn_invisible(&mut self) -> error::Result<()> {
+  pub fn turn_visible(&mut self) -> error::Result<()> {
     self.is_invisible = false;
     if let Some(sprite) = self.scene.borrow_mut().child_mut(self.sprite_id) {
       sprite.set_opacity(1.0);
