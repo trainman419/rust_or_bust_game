@@ -235,6 +235,10 @@ where Window: piston_window::Window,
 
     if let Some(hero) = self.state.entities.get("hero") {
       let mut hero_position = hero.borrow().position();
+      // TODO: find a better solution than padding here.
+      // Intersection with bounds should account for size for actor.
+      // Camera size is based on size of window.
+      // Other size might be based on size of sprite or collision box.
       hero_position.x = clamp(
         hero_position.x,
         self.state.level.world_bounds.0.x + 75.0,

@@ -21,7 +21,7 @@
     {
       "name": "hero",
       "image": "characters/hero/ghost_idle",
-      "position": {"x": 800, "y": 300},
+      "position": {"x": 200, "y": 300},
       "scale": 10,
       "visible": true,
       "active": true
