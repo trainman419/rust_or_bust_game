@@ -8,6 +8,7 @@ use std::collections::HashMap;
 
 use error;
 
+pub type EntityRcRef = Rc<RefCell<Actor>>;
 pub type EntityMap = HashMap<String, Rc<RefCell<Actor>>>;
 pub type WorldPoint2 = nalgebra::Point2<f64>;
 pub type WorldVector2 = nalgebra::Vector2<f64>;

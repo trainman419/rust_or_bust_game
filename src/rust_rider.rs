@@ -124,6 +124,8 @@ pub struct State {
   level: level::Level,
   camera: camera::Camera2,
   entities: entity::EntityMap,
+  hero: Option<entity::EntityRcRef>,
+  detective: Option<entity::EntityRcRef>,
 }
 
 impl State {
@@ -133,7 +135,19 @@ impl State {
       level: level,
       camera: camera,
       entities: entity::EntityMap::new(),
+      hero: None,
+      detective: None,
     }
+  }
+
+  pub fn get_hero(&self) -> entity::EntityRcRef {
+    let hero_opt = self.hero.clone();
+    hero_opt.unwrap()
+  }
+
+  pub fn get_detective(&self) -> entity::EntityRcRef {
+    let detective_opt = self.detective.clone();
+    detective_opt.unwrap()
   }
 }
 
@@ -164,23 +178,20 @@ where Window: piston_window::Window,
         },
         // TODO: these speeds should come from config.
         piston_window::Key::Left => {
-          if let Some(hero) = self.state.entities.get("hero") {
-            let mut velocity = hero.borrow().velocity();
-            velocity.x = -500.0;
-            hero.borrow_mut().set_velocity(velocity)?;
-          }
+          let mut hero = self.state.get_hero();
+          let mut velocity = hero.borrow().velocity();
+          velocity.x = -500.0;
+          hero.borrow_mut().set_velocity(velocity)?;
         },
         piston_window::Key::Right => {
-          if let Some(hero) = self.state.entities.get("hero") {
-            let mut velocity = hero.borrow().velocity();
-            velocity.x = 500.0;
-            hero.borrow_mut().set_velocity(velocity)?;
-          }
+          let mut hero = self.state.get_hero();
+          let mut velocity = hero.borrow().velocity();
+          velocity.x = 500.0;
+          hero.borrow_mut().set_velocity(velocity)?;
         },
         piston_window::Key::LShift => {
-          if let Some(hero) = self.state.entities.get("hero") {
-            hero.borrow_mut().turn_invisible()?;
-          }
+          let mut hero = self.state.get_hero();
+          hero.borrow_mut().turn_invisible()?;
         },
         _ => {},
       },
@@ -198,11 +209,10 @@ where Window: piston_window::Window,
     match button {
       &piston_window::Button::Keyboard(key) => match key {
         piston_window::Key::Left | piston_window::Key::Right => {
-          if let Some(hero) = self.state.entities.get("hero") {
-            let mut velocity = hero.borrow().velocity();
-            velocity.x = 0.0;
-            hero.borrow_mut().set_velocity(velocity)?;
-          }
+          let mut hero = self.state.get_hero();
+          let mut velocity = hero.borrow().velocity();
+          velocity.x = 0.0;
+          hero.borrow_mut().set_velocity(velocity)?;
         },
         piston_window::Key::LShift => {
           if let Some(hero) = self.state.entities.get("hero") {
@@ -366,18 +376,17 @@ where
     }
 
     // insert detective
-    let detective = level.detective;
-    state.entities.insert(
-        detective.name.to_owned(),
-        make_detective(&detective, &assets, scene.clone()),
-      );
+    let detective_cfg = level.detective;
+    let detective = make_detective(&detective_cfg, &assets, scene.clone());
+    state.detective = Some(detective.clone());
+    state.entities.insert(detective_cfg.name.to_owned(), detective);
 
     // insert hero
-    let hero = level.hero;
-    state.entities.insert(
-        hero.name.to_owned(),
-        make_hero(&hero, &assets, scene.clone()),
-      );
+    let hero_cfg = level.hero;
+    let hero = make_hero(&hero_cfg, &assets, scene.clone());
+    state.hero = Some(hero.clone());
+    state.entities.insert(hero_cfg.name.to_owned(), hero);
+
 
     let mut sound_effects = SoundEffects::new();
     sound_effects.start_music();
