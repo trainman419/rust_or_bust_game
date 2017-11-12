@@ -98,6 +98,12 @@ impl Detective {
       next_state: DetectiveState::Walk,
     }
   }
+
+  pub fn interact_entity(&mut self, actor: &entity::Actor) {
+    if actor.active() {
+      println!("Detective interacted with {}!", actor.name());
+    }
+  }
 }
 
 
@@ -182,7 +188,7 @@ impl entity::Actor for Detective {
 
     // TODO(austin): make the detective do useful things here
     let mut velocity = self.velocity();
-    if self.position.x > 700.0 {
+    if self.position.x > 1000.0 {
       velocity.x = -self.speed;
     } else if self.position.x < 200.0 {
       velocity.x = self.speed;

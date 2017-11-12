@@ -164,8 +164,21 @@ where Window: piston_window::Window,
   ) -> error::Result<()> {
     use piston_window::Window; // size
 
+    // Call on_update on entities, to move them and update their animations
     for (ref _name, ref entity) in self.state.entities.iter() {
       entity.borrow_mut().on_update(update_args)?;
+    }
+
+    // Give the detective a chance to interact with other active objects in the
+    // scene
+    let mut detective = self.state.get_detective();
+    for (ref _name, ref entity) in self.state.entities.iter() {
+      let entity = entity.borrow();
+      if entity.name() != "detective" {
+        if entity.overlap(&*detective.borrow()) {
+          detective.borrow_mut().interact_entity(&*entity);
+        }
+      }
     }
 
     if let Some(hero) = self.state.entities.get("hero") {

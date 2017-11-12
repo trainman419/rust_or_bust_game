@@ -17,7 +17,9 @@ pub struct Actor {
   pub position: Point,
   pub scale: f64,
   pub visible: bool,
+  #[serde(default)]
   pub active: bool,
+  #[serde(default)]
   pub reversible: bool,
 }
 
