@@ -24,13 +24,14 @@ mod application;
 mod assets;
 mod camera;
 mod config;
+mod default_actor;
 mod detective;
 mod entity;
 mod error;
-mod level;
 mod handler;
 mod hero;
 mod item;
+mod level;
 mod rust_rider;
 
 use std::cell::RefCell;

@@ -23,10 +23,8 @@ use std::path::Path;
 
 use assets;
 use camera;
+use default_actor;
 use entity;
-use entity::Position;
-use entity::Scaled;
-use entity::Sprited;
 use error;
 use handler;
 use hero;
@@ -46,76 +44,6 @@ type Texture = piston_window::G2dTexture;
 type SceneRcRef = Rc<RefCell<sprite::Scene<Texture>>>;
 
 type Scene = sprite::Scene<Texture>;
-
-fn draw_rectangle<G>(
-  point1: &Point,
-  point2: &Point,
-  context: &piston_window::Context,
-  graphics: &mut G,
-) where
-  G: graphics::Graphics,
-{
-  use self::graphics::Transformed; // piston_window::Context.{trans,orient}
-  let delta = point2 - point1;
-  piston_window::rectangle(
-    CYAN,
-    [0.0, 0.0, delta[0], delta[1]],
-    context
-      .trans(point1.x, point1.y)
-      .transform,
-    graphics,
-  );
-}
-
-fn draw_line_segment<G>(
-  point1: &Point,
-  point2: &Point,
-  context: &piston_window::Context,
-  graphics: &mut G,
-) where
-  G: graphics::Graphics,
-{
-  use self::graphics::Transformed; // piston_window::Context.{trans,orient}
-
-  let tangent = point2 - point1;
-  let width = nalgebra::distance(point1, point2);
-  let height = 4.0;
-  piston_window::rectangle(
-    BLACK,
-    [0.0, 0.0, width, height],
-    context
-      .trans(point1.x, point1.y - height / 2.0)
-      .orient(tangent.x, tangent.y)
-      .transform,
-    graphics,
-  );
-}
-
-struct LineSegment {
-  point1: Point,
-  point2: Point,
-}
-
-impl LineSegment {
-  pub fn new(point1: Point, point2: Point) -> LineSegment {
-    LineSegment {
-      point1: point1,
-      point2: point2,
-    }
-  }
-
-  pub fn draw<G>(&self, context: &piston_window::Context, graphics: &mut G)
-  where
-    G: graphics::Graphics,
-  {
-    draw_line_segment(&self.point1, &self.point2, context, graphics);
-  }
-}
-
-const CYAN:  piston_window::types::Color = [0.0, 1.0, 1.0, 0.5];
-const BLACK: piston_window::types::Color = [0.0, 0.0, 0.0, 1.0];
-const GREEN: piston_window::types::Color = [0.0, 1.0, 0.0, 1.0];
-const BLUE:  piston_window::types::Color = [0.0, 0.0, 1.0, 1.0];
 
 pub struct SoundEffects {
   music: Option<thread::JoinHandle<()>>,
@@ -208,11 +136,6 @@ impl SoundEffects {
 /// for a resumable session of the game.
 pub struct State {
   level: level::Level,
-  edit_mode: EditMode,
-  line_segments: Vec<LineSegment>,
-  active_line_segment: Option<Point>,
-  active_selection: Option<Point>,
-  mouse_position: Point,
   camera: camera::Camera2,
   entities: entity::EntityMap,
 }
@@ -222,11 +145,6 @@ impl State {
   pub fn new(level: level::Level, camera: camera::Camera2) -> State {
     State {
       level: level,
-      edit_mode: EditMode::Insert,
-      line_segments: Vec::new(),
-      active_line_segment: None,
-      active_selection: None,
-      mouse_position: Point::new(0.0, 0.0),
       camera: camera,
       entities: entity::EntityMap::new(),
     }
@@ -248,16 +166,6 @@ where
 impl<Window> handler::InputHandler for GameMode<Window>
 where Window: piston_window::Window,
 {
-  fn on_mouse_cursor<Event: piston_window::GenericEvent>(
-    &mut self,
-    _event: &Event,
-    position: &[f64; 2],
-  ) -> error::Result<()> {
-    self.state.mouse_position = Point::new(position[0], position[1]);
-
-    Ok(())
-  }
-
   fn on_press<Event: piston_window::GenericEvent>(
     &mut self,
     _event: &Event,
@@ -265,40 +173,15 @@ where Window: piston_window::Window,
   ) -> error::Result<()> {
     match button {
       &piston_window::Button::Keyboard(key) => match key {
-        // This is a dirty way to just close the game.
-        piston_window::Key::Q => {
-          return Err(error::Error::from("Exited Game"));
-        },
         piston_window::Key::X => {
-          self.sound_effects.play("spooked_birds");
+          self.sound_effects.play("test");
         },
-        piston_window::Key::LShift | piston_window::Key::RShift => {
-          self.state.edit_mode = EditMode::Select;
-        },
+        // TODO: these should come from config.
         piston_window::Key::Left => {
           self.state.camera.velocity.x = -500.0;
         },
         piston_window::Key::Right => {
           self.state.camera.velocity.x = 500.0;
-        },
-        piston_window::Key::Up => {
-          self.state.camera.velocity.y = 500.0;
-        },
-        piston_window::Key::Down => {
-          self.state.camera.velocity.y = -500.0;
-        },
-        _ => {},
-      },
-      &piston_window::Button::Mouse(mouse_button) => match mouse_button {
-        piston_window::MouseButton::Left => {
-          match self.state.edit_mode {
-            EditMode::Select => {
-              self.state.active_selection = Some(self.state.mouse_position);
-            },
-            EditMode::Insert => {
-              self.state.active_line_segment = Some(self.state.mouse_position);
-            },
-          }
         },
         _ => {},
       },
@@ -315,39 +198,11 @@ where Window: piston_window::Window,
   ) -> error::Result<()> {
     match button {
       &piston_window::Button::Keyboard(key) => match key {
-        piston_window::Key::LShift | piston_window::Key::RShift => {
-          self.state.edit_mode = EditMode::Insert;
-        },
         piston_window::Key::Left => {
           self.state.camera.velocity.x = 0.0;
         },
         piston_window::Key::Right => {
           self.state.camera.velocity.x = 0.0;
-        },
-        piston_window::Key::Up => {
-          self.state.camera.velocity.y = 0.0;
-        },
-        piston_window::Key::Down => {
-          self.state.camera.velocity.y = 0.0;
-        },
-        _ => {},
-      },
-      &piston_window::Button::Mouse(mouse_button) => match mouse_button {
-        piston_window::MouseButton::Left => {
-          match self.state.active_selection {
-            Some(_) => {
-              self.state.active_selection = None;
-            }
-            None => {}
-          }
-          match self.state.active_line_segment {
-            Some(point1) => {
-              self.state.line_segments.push(
-                LineSegment::new(point1, self.state.mouse_position));
-              self.state.active_line_segment = None;
-            }
-            None => {}
-          }
         },
         _ => {},
       },
@@ -388,7 +243,6 @@ where Window: piston_window::OpenGLWindow,
     // Borrow member references immutably before allowing self to be borrowed
     // mutably by self.window.draw_2d().
     let state = &self.state;
-    let window_size = self.window.borrow().size();
 
     self.window.borrow_mut().draw_2d(event, |context, graphics| {
       let translation = self.state.camera.position;
@@ -397,46 +251,7 @@ where Window: piston_window::OpenGLWindow,
         .zoom(self.state.camera.zoom)
         .transform;
 
-      let edit_bar_color = match state.edit_mode {
-        EditMode::Insert => GREEN,
-        EditMode::Select => BLUE,
-      };
-      let edit_bar_width = window_size.width;
-      let edit_bar_height = 20;
-      let edit_bar_x_offset = 0;
-      let edit_bar_y_offset = window_size.height - edit_bar_height;
-
       piston_window::clear([1.0; 4], graphics);
-      piston_window::rectangle(
-        edit_bar_color,
-        [
-          edit_bar_x_offset as f64,
-          edit_bar_y_offset as f64,
-          edit_bar_width as f64,
-          edit_bar_height as f64,
-        ],
-        context.transform,
-        graphics,
-      );
-
-      match state.active_selection {
-        Some(point1) => {
-          draw_rectangle(&point1, &state.mouse_position, &context, graphics);
-        }
-        None => {}
-      }
-
-      match state.active_line_segment {
-        Some(point1) => {
-          draw_line_segment(&point1, &state.mouse_position, &context, graphics);
-        }
-        None => {}
-      }
-
-      for line in state.line_segments.iter() {
-        line.draw(&context, graphics);
-      }
-
       self.scene.borrow_mut().draw(transform, graphics);
     });
 
@@ -542,6 +357,20 @@ where Window: piston_window::OpenGLWindow,
   }
 }
 
+fn make_actor(
+  actor: &level::Actor,
+  assets: &assets::AssetMap,
+  scene: SceneRcRef,
+) -> Rc<entity::Actor> {
+  if actor.name == "hero" {
+    Rc::new(hero::Hero::new(actor, assets, scene.clone()))
+  } else if actor.name == "detective" {
+    Rc::new(hero::Hero::new(actor, assets, scene.clone()))
+  } else {
+    Rc::new(default_actor::DefaultActor::new(actor, assets, scene.clone()))
+  }
+}
+
 impl<Window> GameMode<Window>
 where
   Window: piston_window::Window + piston_window::OpenGLWindow,
@@ -550,14 +379,9 @@ where
   pub fn new(
     window: Rc<RefCell<piston_window::PistonWindow<Window>>>,
   ) -> GameMode<Window> {
-    use piston_window::Window; // size
-    let window_size = window.borrow().size();
-
-    let camera = camera::Camera2 {
-      zoom: 1.0,
-      position: camera::WorldPoint2::new(0.0, 0.0),
-      velocity: camera::WorldVector2::new(0.0, 0.0),
-    };
+    // TODO: should be loaded as an actor from level
+    let mut camera = camera::Camera2::new();
+    camera.position.y = 800.0;
 
     let assets = load_assets(&mut window.borrow_mut());
 
@@ -567,12 +391,10 @@ where
     let mut state = State::new(level.clone(), camera);
 
     for actor in level.actors.iter() {
-      if actor.name == "hero" {
-        let hero = hero::Hero::new(&actor, &assets, scene.clone());
-        state.entities.insert(actor.name.to_owned(), Rc::new(hero));
-      } else if actor.name == "detective" {
-      } else {
-      }
+      state.entities.insert(
+        actor.name.to_owned(),
+        make_actor(&actor, &assets, scene.clone()),
+      );
     }
 
     let mut sound_effects = SoundEffects::new();

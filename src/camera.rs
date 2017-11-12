@@ -13,6 +13,14 @@ pub struct Camera2 {
 }
 
 impl Camera2 {
+  pub fn new() -> Camera2 {
+    Camera2 {
+      zoom: 1.0,
+      position: WorldPoint2::new(0.0, 0.0),
+      velocity: WorldVector2::new(0.0, 0.0),
+    }
+  }
+
   pub fn on_update(&mut self, update_args: &piston_window::UpdateArgs) {
     let new_position = self.position + self.velocity * update_args.dt;
     self.position = new_position;

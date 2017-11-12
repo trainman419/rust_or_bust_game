@@ -1,29 +1,16 @@
-extern crate ai_behavior;
 extern crate piston_window;
 extern crate sprite;
 extern crate uuid;
 
-use self::ai_behavior::{
-    Action,
-    Sequence,
-    WaitForever,
-    While,
-};
-
 use std::cell::RefCell;
 use std::rc::Rc;
-use std::collections::HashMap;
 
 use assets;
 use entity;
 use error;
 use level;
 
-type Texture = piston_window::G2dTexture;
-type SceneRcRef = Rc<RefCell<sprite::Scene<Texture>>>;
-
-
-pub struct Hero {
+pub struct DefaultActor {
   name: String,
   image: String,
   position: (f64, f64),
@@ -31,50 +18,40 @@ pub struct Hero {
   visible: bool,
   active: bool,
   sprite_id: uuid::Uuid,
-  scene: SceneRcRef,
+  scene: Rc<RefCell<sprite::Scene<piston_window::G2dTexture>>>,
 }
 
-
-impl Hero {
+impl DefaultActor {
   pub fn new(
     actor: &level::Actor,
     assets: &assets::AssetMap,
-    scene: SceneRcRef,
-  ) -> Hero {
-    let hero_texture = assets.get(&actor.image)
+    scene: Rc<RefCell<sprite::Scene<piston_window::G2dTexture>>>,
+  ) -> DefaultActor {
+    let texture = assets.get(&actor.image)
         .expect("Could not find asset")
         .frames.get(0).unwrap().texture.clone();
 
-    let mut hero_sprite = sprite::Sprite::from_texture(hero_texture);
+    let mut sprite = sprite::Sprite::from_texture(texture);
 
-    hero_sprite.set_position(actor.position.x, actor.position.y);
-    hero_sprite.set_scale(actor.scale, actor.scale);
+    sprite.set_position(actor.position.x, actor.position.y);
+    sprite.set_scale(actor.scale, actor.scale);
 
-    let hero_id: uuid::Uuid = scene.borrow_mut().add_child(hero_sprite);
+    let id: uuid::Uuid = scene.borrow_mut().add_child(sprite);
 
-    let seq = Sequence(vec![
-        While(Box::new(WaitForever), vec![
-              Action(sprite::Ease(sprite::EaseFunction::ExponentialIn, Box::new(sprite::MoveBy(3.0, 0.0, 50.0)))),
-              Action(sprite::Ease(sprite::EaseFunction::ExponentialIn, Box::new(sprite::MoveBy(3.0, 0.0, -50.0)))),
-        ]),
-        ]);
-    scene.borrow_mut().run(hero_id, &seq);
-
-    Hero {
+    DefaultActor {
       name: actor.name.to_owned(),
       image: actor.image.to_owned(),
       position: (actor.position.x, actor.position.y),
       scale: actor.scale,
       visible: actor.visible,
       active: actor.active,
-      sprite_id: hero_id,
+      sprite_id: id,
       scene: scene,
     }
   }
 }
 
-
-impl entity::Actor for Hero {
+impl entity::Actor for DefaultActor {
   fn name(&self) -> String {
     self.name.clone()
   }
@@ -133,10 +110,8 @@ impl entity::Actor for Hero {
   }
 
   fn interact_hero(&mut self) {
-    println!("Hero interacted with Hero!");
   }
 
   fn interact_detective(&mut self) {
-    println!("Hero interacted with Detective!");
   }
 }
