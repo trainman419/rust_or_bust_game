@@ -25,8 +25,8 @@ type SceneRcRef = Rc<RefCell<sprite::Scene<Texture>>>;
 pub type HeroRcRef = Rc<RefCell<Hero>>;
 
 
-const INVISIBLE_OPACITY: f32 = 0.4;
-const INVISIBLE_SCALE_FACTOR: f64 = 0.8;
+const TRANSPARENT_OPACITY: f32 = 0.4;
+const TRANSPARENT_SCALE_FACTOR: f64 = 0.8;
 
 
 pub struct Hero {
@@ -42,7 +42,7 @@ pub struct Hero {
   idle: Rc<assets::ImageAsset>,
   frame: usize,
   next_frame: f64,
-  is_invisible: bool,
+  transparent: bool,
 }
 
 
@@ -68,7 +68,7 @@ impl Hero {
 
     hero_sprite.set_position(actor.position.x, actor.position.y);
     hero_sprite.set_scale(actor.scale, actor.scale);
-    hero_sprite.set_opacity(INVISIBLE_OPACITY);
+    hero_sprite.set_opacity(TRANSPARENT_OPACITY);
 
     let hero_id: uuid::Uuid = scene.borrow_mut().add_child(hero_sprite);
 
@@ -85,23 +85,27 @@ impl Hero {
       idle: hero_idle.clone(),
       frame,
       next_frame,
-      is_invisible: true,
+      transparent: true,
     }
   }
 
-  pub fn turn_invisible(&mut self) -> error::Result<()> {
-    self.is_invisible = true;
+  pub fn is_transparent(&self) -> bool {
+    self.transparent
+  }
+
+  pub fn turn_transparent(&mut self) -> error::Result<()> {
+    self.transparent = true;
     if let Some(sprite) = self.scene.borrow_mut().child_mut(self.sprite_id) {
-      sprite.set_opacity(INVISIBLE_OPACITY);
+      sprite.set_opacity(TRANSPARENT_OPACITY);
       let current_scale = sprite.get_scale();
-      sprite.set_scale(current_scale.0 * INVISIBLE_SCALE_FACTOR,
-                       current_scale.1 * INVISIBLE_SCALE_FACTOR);
+      sprite.set_scale(current_scale.0 * TRANSPARENT_SCALE_FACTOR,
+                       current_scale.1 * TRANSPARENT_SCALE_FACTOR);
     }
     Ok(())
   }
 
-  pub fn turn_visible(&mut self) -> error::Result<()> {
-    self.is_invisible = false;
+  pub fn turn_opaque(&mut self) -> error::Result<()> {
+    self.transparent = false;
     if let Some(sprite) = self.scene.borrow_mut().child_mut(self.sprite_id) {
       sprite.set_opacity(1.0);
       sprite.set_scale(self.scale, self.scale);

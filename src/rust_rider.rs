@@ -98,12 +98,12 @@ where Window: piston_window::Window,
         },
         piston_window::Key::LShift => {
           let mut hero = self.state.get_hero();
-          hero.borrow_mut().turn_visible()?;
+          hero.borrow_mut().turn_opaque()?;
         },
         piston_window::Key::Space => {
           let mut hero = self.state.get_hero();
           for (ref _name, ref entity) in self.state.entities.iter() {
-            if entity.borrow().overlap(&*hero.borrow()) {
+            if !hero.borrow().is_transparent() && entity.borrow().overlap(&*hero.borrow()) {
               println!("Hero interacting with {}", entity.borrow().name());
               entity.borrow_mut().interact_hero(&mut self.sound_effects);
             }
@@ -132,7 +132,7 @@ where Window: piston_window::Window,
         },
         piston_window::Key::LShift => {
           let mut hero = self.state.get_hero();
-          hero.borrow_mut().turn_invisible()?;
+          hero.borrow_mut().turn_transparent()?;
         },
         _ => {},
       },
