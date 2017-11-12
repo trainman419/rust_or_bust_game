@@ -212,7 +212,7 @@ impl entity::Actor for Hero {
     Ok(())
   }
 
-  fn interact_hero(&mut self, sounds: &mut sound::SoundEffects) {
+  fn interact_hero(&mut self, _sounds: &mut sound::SoundEffects) {
     println!("Hero interacted with Hero!");
   }
 

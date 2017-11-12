@@ -7,8 +7,6 @@ extern crate sprite;
 
 use std::cell::RefCell;
 use std::rc::Rc;
-use std::ops::Deref;
-
 
 use assets;
 use camera;
@@ -65,7 +63,7 @@ where
 {
   state: State,
   window: Rc<RefCell<piston_window::PistonWindow<Window>>>,
-  assets: assets::AssetMap,
+  //assets: assets::AssetMap,
   scene: SceneRcRef,
   sound_effects: sound::SoundEffects,
   glyphs: Rc<RefCell<piston_window::Glyphs>>,
@@ -211,7 +209,6 @@ where Window: piston_window::OpenGLWindow,
     // Borrow member references immutably before allowing self to be borrowed
     // mutably by self.window.draw_2d().
     let window_size = self.window.borrow().size();
-    let factory = self.window.borrow().factory.clone();
 
     self.window.borrow_mut().draw_2d(event, |context, graphics| {
       let translation = self.state.camera.position;
@@ -329,14 +326,14 @@ where
     let mut sound_effects = sound::SoundEffects::new();
     sound_effects.start_music();
 
-    GameMode::new_with_state(window, state, assets, scene.clone(), sound_effects, Rc::new(RefCell::new(glyphs)))
+    GameMode::new_with_state(window, state, scene.clone(), sound_effects, Rc::new(RefCell::new(glyphs)))
   }
 
   /// Create a GameMode with an existing State.
   pub fn new_with_state(
     window: Rc<RefCell<piston_window::PistonWindow<Window>>>,
     state: State,
-    assets: assets::AssetMap,
+    //assets: assets::AssetMap,
     scene: SceneRcRef,
     sound_effects: sound::SoundEffects,
     glyphs: Rc<RefCell<piston_window::Glyphs>>,
@@ -344,7 +341,7 @@ where
     GameMode {
       window,
       state,
-      assets,
+      //assets,
       scene,
       sound_effects,
       glyphs,
