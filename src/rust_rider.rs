@@ -101,7 +101,7 @@ impl SoundEffects {
     }
 
     if filename == "" {
-      println!("Could not find file");
+      println!("Could not find file: {}", file);
       return ();
     }
 
