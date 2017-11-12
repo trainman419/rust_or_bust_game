@@ -11,11 +11,15 @@ pub struct Point {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum ActorType {
+  Static,
+  Obstacle,
+  Clue(bool), // true if this is the macguffin; false otherwise
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Actor {
   pub name: String,
+  pub actor_type: ActorType,
   pub image: String,
   pub sound: String,
   pub position: Point,

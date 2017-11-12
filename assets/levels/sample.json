@@ -33,6 +33,7 @@
   "actors": [
     {
       "name": "background",
+      "actor_type": "Static",
       "image": "sprites/Dark-Forest_Background",
       "sound": "",
       "position": {"x": 2500, "y": 0},
@@ -42,6 +43,9 @@
     },
     {
       "name": "car",
+      "actor_type": {
+        "Clue": true
+      },
       "image": "objects/car/car",
       "sound": "car_horn",
       "position": {"x": 4200, "y": 300},
@@ -52,6 +56,7 @@
     },
     {
       "name": "cairn",
+      "actor_type": "Obstacle",
       "image": "objects/cairn/cairn_fall",
       "sound": "rocks",
       "position": {"x": 850, "y": 300},
@@ -62,6 +67,7 @@
     },
     {
       "name": "cairn2",
+      "actor_type": "Obstacle",
       "image": "objects/cairn/cairn_fall",
       "sound": "rocks",
       "position": {"x": 2500, "y": 300},

@@ -10,6 +10,7 @@ use std::collections::HashMap;
 
 use error;
 use sound;
+use level;
 
 pub type EntityRcRef = Rc<RefCell<Actor>>;
 pub type EntityMap = HashMap<String, Rc<RefCell<Actor>>>;
@@ -25,6 +26,9 @@ pub trait Actor {
   fn active(&self) -> bool;
   fn sprite_id(&self) -> uuid::Uuid;
   fn width(&self) -> f64;
+  fn actor_type(&self) -> level::ActorType {
+    level::ActorType::Static
+  }
 
   fn bb(&self) -> graphics::types::Rectangle;
 

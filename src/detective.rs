@@ -45,6 +45,7 @@ pub struct Detective {
   // is done
   state: DetectiveState,
   next_state: DetectiveState,
+  last_obstacle: String,
 }
 
 
@@ -98,17 +99,38 @@ impl Detective {
       next_frame,
       state: DetectiveState::Idle,
       next_state: DetectiveState::Idle,
+      last_obstacle: String::from(""),
     }
   }
 
   pub fn interact_entity(&mut self, actor: &entity::Actor) {
+    use entity::Actor;
     // How can the detective interact with things?
     //  - barrier: detective turns around and walks the other way
     //  - clue: detective stops, inspects
     //    - if this is the macguffin, trigger level completion
     //    - if this isn't the macguffin, detective continues moving
-    if actor.active() {
-      //println!("Detective interacted with {}!", actor.name());
+    match actor.actor_type() {
+      // Do nothing for static actors
+      level::ActorType::Static => (),
+      level::ActorType::Obstacle => {
+        if self.last_obstacle != actor.name() {
+          println!("Detective hit obstacle {}!", actor.name());
+          self.last_obstacle = actor.name();
+
+          // if this obstacle is "active", walk the other way
+          if actor.active() {
+            let mut velocity = self.velocity;
+            velocity.x = -velocity.x;
+            self.set_velocity(velocity);
+          }
+        }
+      },
+      level::ActorType::Clue(macguffin) => {
+        if macguffin {
+          println!("Detective found the macguffin!");
+        }
+      }
     }
   }
 }
@@ -197,13 +219,16 @@ impl entity::Actor for Detective {
     let new_position = self.position + self.velocity * update_args.dt;
     self.set_position(new_position)?;
 
-    // TODO(austin): make the detective do useful things here
-    if self.position.x > 1000.0 {
+    // HACK(austin): keep the detective from wandering off screen
+    // TODO(austin): don't use hardcoded world bounds here
+    if self.position.x > 4800.0 {
       let speed = -self.speed;
       self.set_velocity_x(speed);
-    } else if self.position.x < 200.0 {
+      self.last_obstacle = String::from("");
+    } else if self.position.x < 150.0 {
       let speed = self.speed;
       self.set_velocity_x(speed);
+      self.last_obstacle = String::from("");
     }
 
     // update time to next frame

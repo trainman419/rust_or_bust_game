@@ -23,6 +23,7 @@ pub struct DefaultActor {
   sprite_id: uuid::Uuid,
   scene: Rc<RefCell<sprite::Scene<piston_window::G2dTexture>>>,
   asset: Rc<assets::ImageAsset>,
+  actor_type: level::ActorType,
   sound: String,
   animating: bool,
   frame: usize,
@@ -59,6 +60,7 @@ impl DefaultActor {
       sprite_id: id,
       scene: scene,
       asset: asset.clone(),
+      actor_type: actor.actor_type.to_owned(),
       sound: actor.sound.to_owned(),
       animating: false,
       frame: 0,
@@ -100,6 +102,10 @@ impl entity::Actor for DefaultActor {
 
   fn width(&self) -> f64 {
     self.width
+  }
+
+  fn actor_type(&self) -> level::ActorType {
+    self.actor_type.to_owned()
   }
 
   fn bb(&self) -> graphics::types::Rectangle {
