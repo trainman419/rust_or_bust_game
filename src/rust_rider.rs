@@ -152,7 +152,24 @@ impl SoundEffects {
     }
   }
 
-  pub fn play(&self, file: &str) {
+  pub fn start_music(&mut self) {
+    if false && self.music.is_none() {
+        let path = String::from("assets/sounds/music/strangeness.ogg");
+        let handle = thread::spawn(move || {
+          let mut music = Music::new(&path).unwrap();
+          music.set_looping(true);
+          music.play();
+          while music.is_playing() {
+            // Todo: Maybe something here
+          }
+        });
+        self.music = Some(handle);
+    } else {
+        println!("Stop right there criminal scum.");
+    }
+  }
+
+  pub fn play(&mut self, file: &str) {
     let mut path = String::from("assets/sounds/effects/");
     let mut filename = "";
 
@@ -174,6 +191,8 @@ impl SoundEffects {
         // Todo: Maybe something here
       }
     });
+
+    self.sounds.push(handle);
   }
 }
 
@@ -186,7 +205,6 @@ pub struct State {
   active_selection: Option<Point>,
   mouse_position: Point,
   camera: camera::Camera2,
-  sound_effects: SoundEffects,
 }
 
 impl State {
@@ -199,7 +217,6 @@ impl State {
       active_selection: None,
       mouse_position: Point::new(0.0, 0.0),
       camera: camera,
-      sound_effects: SoundEffects::new(),
     }
   }
 }
@@ -212,6 +229,7 @@ where
   window: Rc<RefCell<piston_window::PistonWindow<Window>>>,
   assets: AssetMap,
   scene: Scene,
+  sound_effects: SoundEffects,
 }
 
 /// How GameMode responds to input-events.
@@ -240,7 +258,7 @@ where Window: piston_window::Window,
           return Err(error::Error::from("Exited Game"));
         },
         piston_window::Key::X => {
-          self.state.sound_effects.play("test");
+          self.sound_effects.play("test");
         },
         piston_window::Key::LShift | piston_window::Key::RShift => {
           self.state.edit_mode = EditMode::Select;
@@ -528,7 +546,6 @@ where
       position: camera::WorldPoint2::new(0.0, 0.0),
       velocity: camera::WorldVector2::new(0.0, 0.0),
     };
-
     let assets = load_assets(&mut window.borrow_mut());
     let mut scene = Scene::new();
 
@@ -553,8 +570,9 @@ where
 
     scene.run(hero_id, &seq);
 
-
-    GameMode::new_with_state(window, State::new(camera), assets, scene)
+    let mut sound_effects = SoundEffects::new();
+    sound_effects.start_music();
+    GameMode::new_with_state(window, State::new(camera), assets, scene, sound_effects)
   }
 
   /// Create a GameMode with an existing State.
@@ -563,12 +581,14 @@ where
     state: State,
     assets: AssetMap,
     scene: Scene,
+    sound_effects: SoundEffects,
   ) -> GameMode<Window> {
     GameMode {
       window: window,
       state: state,
       assets,
       scene,
+      sound_effects,
     }
   }
 }
