@@ -27,7 +27,6 @@ const INVISIBLE_SCALE_FACTOR: f64 = 0.8;
 
 pub struct Hero {
   name: String,
-  image: String,
   position: entity::WorldPoint2,
   velocity: entity::WorldVector2,
   scale: f64,
@@ -36,7 +35,6 @@ pub struct Hero {
   sprite_id: uuid::Uuid,
   scene: SceneRcRef,
   idle: Rc<assets::ImageAsset>,
-  state: String,
   frame: usize,
   next_frame: f64,
   is_invisible: bool,
@@ -49,15 +47,12 @@ impl Hero {
     assets: &assets::AssetMap,
     scene: SceneRcRef,
   ) -> Hero {
-    let mut hero_assets = assets::AssetMap::new();
-
     // Get the idle asset and add it to our internal state to asset map
     let hero_idle = assets.get(&actor.image)
         .expect("Could not find asset")
         .clone();
 
-    // Set the current state and remaining frame time
-    let state = String::from("idle");
+    // Set the remaining frame time
     let frame : usize = 0;
     let frame0 = hero_idle.frames.get(0).unwrap();
     let next_frame = frame0.frame_time;
@@ -73,7 +68,6 @@ impl Hero {
 
     Hero {
       name: actor.name.to_owned(),
-      image: actor.image.to_owned(),
       position: entity::WorldPoint2::new(actor.position.x, actor.position.y),
       velocity: entity::WorldVector2::new(0.0, 0.0),
       scale: actor.scale,
@@ -82,7 +76,6 @@ impl Hero {
       sprite_id: hero_id,
       scene: scene,
       idle: hero_idle.clone(),
-      state,
       frame,
       next_frame,
       is_invisible: false,

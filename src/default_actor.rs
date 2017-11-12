@@ -12,7 +12,6 @@ use level;
 
 pub struct DefaultActor {
   name: String,
-  image: String,
   position: entity::WorldPoint2,
   velocity: entity::WorldVector2,
   scale: f64,
@@ -20,6 +19,10 @@ pub struct DefaultActor {
   active: bool,
   sprite_id: uuid::Uuid,
   scene: Rc<RefCell<sprite::Scene<piston_window::G2dTexture>>>,
+  asset: Rc<assets::ImageAsset>,
+  animating: bool,
+  frame: usize,
+  next_frame: f64,
 }
 
 impl DefaultActor {
@@ -28,9 +31,9 @@ impl DefaultActor {
     assets: &assets::AssetMap,
     scene: Rc<RefCell<sprite::Scene<piston_window::G2dTexture>>>,
   ) -> DefaultActor {
-    let texture = assets.get(&actor.image)
-        .expect("Could not find asset")
-        .frames.get(0).unwrap().texture.clone();
+    let asset = assets.get(&actor.image)
+        .expect("Could not find asset").clone();
+    let texture = asset.frames.get(0).unwrap().texture.clone();
 
     let mut sprite = sprite::Sprite::from_texture(texture);
 
@@ -41,7 +44,6 @@ impl DefaultActor {
 
     DefaultActor {
       name: actor.name.to_owned(),
-      image: actor.image.to_owned(),
       position: entity::WorldPoint2::new(actor.position.x, actor.position.y),
       velocity: entity::WorldVector2::new(0.0, 0.0),
       scale: actor.scale,
@@ -49,6 +51,10 @@ impl DefaultActor {
       active: actor.active,
       sprite_id: id,
       scene: scene,
+      asset: asset.clone(),
+      animating: false,
+      frame: 0,
+      next_frame: 0.0,
     }
   }
 }
@@ -119,6 +125,39 @@ impl entity::Actor for DefaultActor {
   fn on_update(&mut self, update_args: &piston_window::UpdateArgs) -> error::Result<()> {
     let new_position = self.position + self.velocity * update_args.dt;
     self.set_position(new_position)?;
+
+    // update time to next frame
+    if self.animating {
+      self.next_frame -= update_args.dt;
+
+      if self.next_frame <= 0.0 {
+        // if it's time for the next frame, get the asset
+        let asset = &self.asset;
+
+        // get the index of the next frame
+        self.frame += 1;
+
+        // If this is the last frame, stop animation
+        if self.frame + 1 >= asset.frames.len() {
+          self.animating = false;
+        }
+
+        // Clamp frame number to within bounds
+        if self.frame >= asset.frames.len() {
+          self.frame = asset.frames.len() - 1;
+        }
+
+        //// Get the next frame
+        let frame = asset.frames.get(self.frame).unwrap();
+
+        // Set the frame time and the update the sprite
+        self.next_frame += frame.frame_time;
+        if let Some(sprite) = self.scene.borrow_mut().child_mut(self.sprite_id) {
+            sprite.set_texture(frame.texture.clone());
+        }
+      }
+    }
+
     Ok(())
   }
 

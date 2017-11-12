@@ -24,7 +24,6 @@ pub struct Detective {
   sprite_id: uuid::Uuid,
   scene: SceneRcRef,
   idle: Rc<assets::ImageAsset>, // asset for idle animation
-  state: String,
   frame: usize,
   next_frame: f64,
 }
@@ -36,15 +35,12 @@ impl Detective {
     assets: &assets::AssetMap,
     scene: SceneRcRef,
   ) -> Detective {
-    let mut hero_assets = assets::AssetMap::new();
-
     // Get the idle asset and add it to our internal state to asset map
     let idle = assets.get(&actor.idle)
         .expect("Could not find asset")
         .clone();
 
     // Set the current state and remaining frame time
-    let state = String::from("idle");
     let frame : usize = 0;
     let frame0 = idle.frames.get(0).unwrap();
     let next_frame = frame0.frame_time;
@@ -68,7 +64,6 @@ impl Detective {
       sprite_id: hero_id,
       scene: scene,
       idle: idle.clone(),
-      state,
       frame,
       next_frame,
     }
