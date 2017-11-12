@@ -16,6 +16,12 @@ type Texture = piston_window::G2dTexture;
 type SceneRcRef = Rc<RefCell<sprite::Scene<Texture>>>;
 pub type DetectiveRcRef = Rc<RefCell<Detective>>;
 
+#[derive(Copy, Clone)]
+enum DetectiveState {
+    Idle,
+    Walk,
+    Clue,
+}
 
 pub struct Detective {
   name: String,
@@ -27,8 +33,16 @@ pub struct Detective {
   sprite_id: uuid::Uuid,
   scene: SceneRcRef,
   idle: Rc<assets::ImageAsset>, // asset for idle animation
+  walk: Rc<assets::ImageAsset>, // asset for walk animation
+  clue: Rc<assets::ImageAsset>, // asset for clue animation
+  clue_sound: String,
   frame: usize,
   next_frame: f64,
+  // The detective's state machine is tied to his animations; code may set
+  // next_state, but he won't progress to that state until his current animation
+  // is done
+  state: DetectiveState,
+  next_state: DetectiveState,
 }
 
 
@@ -40,6 +54,12 @@ impl Detective {
   ) -> Detective {
     // Get the idle asset and add it to our internal state to asset map
     let idle = assets.get(&actor.idle)
+        .expect("Could not find asset")
+        .clone();
+    let walk = assets.get(&actor.walk)
+        .expect("Could not find asset")
+        .clone();
+    let clue = assets.get(&actor.clue)
         .expect("Could not find asset")
         .clone();
 
@@ -67,8 +87,13 @@ impl Detective {
       sprite_id: hero_id,
       scene: scene,
       idle: idle.clone(),
+      walk,
+      clue,
+      clue_sound: actor.clue_sound.to_owned(),
       frame,
       next_frame,
+      state: DetectiveState::Idle,
+      next_state: DetectiveState::Idle,
     }
   }
 }
@@ -155,15 +180,32 @@ impl entity::Actor for Detective {
 
     if self.next_frame <= 0.0 {
       // if it's time for the next frame, get the asset
-      let asset = &self.idle;
+      let asset = match self.state {
+          DetectiveState::Idle => &self.idle,
+          DetectiveState::Walk => &self.walk,
+          DetectiveState::Clue => &self.clue,
+      };
 
       // get the index of the next frame
       self.frame += 1;
       if self.frame >= asset.frames.len() {
-          // TODO(austin): this is where we could update state to chain in the
-          // next animation
           self.frame = 0;
+          // Transition to next state
+          //self.state = self.next_state;
+          // HACK(austin): cycle states
+          self.state = match self.state {
+              DetectiveState::Idle => DetectiveState::Walk,
+              DetectiveState::Walk => DetectiveState::Clue,
+              DetectiveState::Clue => DetectiveState::Idle,
+          };
       }
+
+      // if it's time for the next frame, get the asset
+      let asset = match self.state {
+          DetectiveState::Idle => &self.idle,
+          DetectiveState::Walk => &self.walk,
+          DetectiveState::Clue => &self.clue,
+      };
 
       // Get the next frame
       let frame = asset.frames.get(self.frame).unwrap();

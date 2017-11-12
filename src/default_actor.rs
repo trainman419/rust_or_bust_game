@@ -163,10 +163,6 @@ impl entity::Actor for DefaultActor {
         if self.frame >= asset.frames.len() {
           self.frame = asset.frames.len() - 1;
         }
-        if self.frame < 0 {
-          self.frame = 0;
-        }
-
 
         //// Get the next frame
         let frame = asset.frames.get(self.frame).unwrap();
