@@ -128,11 +128,12 @@ impl SoundEffects {
   }
 
   pub fn start_music(&mut self) {
-    if false && self.music.is_none() {
+    if self.music.is_none() {
         let path = String::from("assets/sounds/music/strangeness.ogg");
         let handle = thread::spawn(move || {
           let mut music = Music::new(&path).unwrap();
           music.set_looping(true);
+          music.set_volume(0.25);
           music.play();
           while music.is_playing() {
             // Todo: Maybe something here
