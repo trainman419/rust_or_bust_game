@@ -164,6 +164,9 @@ where Window: piston_window::Window,
   ) -> error::Result<()> {
     use piston_window::Window; // size
 
+    let hero = self.state.get_hero();
+    let detective = self.state.get_detective();
+
     // Call on_update on entities, to move them and update their animations
     for (ref _name, ref entity) in self.state.entities.iter() {
       entity.borrow_mut().on_update(update_args)?;
@@ -171,37 +174,39 @@ where Window: piston_window::Window,
 
     // Give the detective a chance to interact with other active objects in the
     // scene
-    let detective = self.state.get_detective();
     for (ref _name, ref entity) in self.state.entities.iter() {
       let entity = entity.borrow();
       if entity.name() != "detective" {
         if entity.overlap(&*detective.borrow()) {
-          detective.borrow_mut().interact_entity(&*entity);
+          if detective.borrow_mut().interact_entity(&*entity) {
+            // TODO(austin): game success!
+          }
         }
       }
     }
 
-    if let Some(hero) = self.state.entities.get("hero") {
-      let mut hero_position = hero.borrow().position();
-      // TODO: find a better solution than padding here.
-      // Intersection with bounds should account for size for actor.
-      // Camera size is based on size of window.
-      // Other size might be based on size of sprite or collision box.
-      hero_position.x = clamp(
-        hero_position.x,
-        self.state.level.world_bounds.0.x + 75.0,
-        self.state.level.world_bounds.1.x - 75.0,
-      );
-      hero.borrow_mut().set_position(hero_position)?;
+    // If the detective sees the hero, make him turn around and go the other
+    // way. Maybe add some text and screaming?
 
-      let window_size = self.window.borrow().size();
-      self.state.camera.position.x = hero_position.x;
-      self.state.camera.position.x = clamp(
-        self.state.camera.position.x,
-        self.state.level.world_bounds.0.x + window_size.width as f64 * 0.5,
-        self.state.level.world_bounds.1.x - window_size.width as f64 * 0.5,
-      );
-    }
+    let mut hero_position = hero.borrow().position();
+    // TODO: find a better solution than padding here.
+    // Intersection with bounds should account for size for actor.
+    // Camera size is based on size of window.
+    // Other size might be based on size of sprite or collision box.
+    hero_position.x = clamp(
+      hero_position.x,
+      self.state.level.world_bounds.0.x + 75.0,
+      self.state.level.world_bounds.1.x - 75.0,
+    );
+    hero.borrow_mut().set_position(hero_position)?;
+
+    let window_size = self.window.borrow().size();
+    self.state.camera.position.x = hero_position.x;
+    self.state.camera.position.x = clamp(
+      self.state.camera.position.x,
+      self.state.level.world_bounds.0.x + window_size.width as f64 * 0.5,
+      self.state.level.world_bounds.1.x - window_size.width as f64 * 0.5,
+    );
 
     Ok(())
   }
