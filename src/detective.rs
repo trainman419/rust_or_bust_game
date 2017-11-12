@@ -81,7 +81,7 @@ impl Detective {
     Detective {
       name: actor.name.to_owned(),
       position: entity::WorldPoint2::new(actor.position.x, actor.position.y),
-      velocity: entity::WorldVector2::new(actor.speed, 0.0),
+      velocity: entity::WorldVector2::new(0.0, 0.0),
       scale: actor.scale,
       speed: actor.speed,
       visible: true,
@@ -100,6 +100,11 @@ impl Detective {
   }
 
   pub fn interact_entity(&mut self, actor: &entity::Actor) {
+    // How can the detective interact with things?
+    //  - barrier: detective turns around and walks the other way
+    //  - clue: detective stops, inspects
+    //    - if this is the macguffin, trigger level completion
+    //    - if this isn't the macguffin, detective continues moving
     if actor.active() {
       println!("Detective interacted with {}!", actor.name());
     }
@@ -187,13 +192,13 @@ impl entity::Actor for Detective {
     self.set_position(new_position)?;
 
     // TODO(austin): make the detective do useful things here
-    let mut velocity = self.velocity();
     if self.position.x > 1000.0 {
-      velocity.x = -self.speed;
+      let speed = -self.speed;
+      self.set_velocity_x(speed);
     } else if self.position.x < 200.0 {
-      velocity.x = self.speed;
+      let speed = self.speed;
+      self.set_velocity_x(speed);
     }
-    self.set_velocity(velocity);
 
     // update time to next frame
     self.next_frame -= update_args.dt;
@@ -242,6 +247,8 @@ impl entity::Actor for Detective {
 
   fn interact_hero(&mut self, _sounds: &mut sound::SoundEffects) {
     println!("Hero interacted with Detective!");
+    let speed = self.speed;
+    self.set_velocity_x(speed);
   }
 
   fn interact_detective(&mut self) {

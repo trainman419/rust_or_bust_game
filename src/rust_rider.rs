@@ -171,7 +171,7 @@ where Window: piston_window::Window,
 
     // Give the detective a chance to interact with other active objects in the
     // scene
-    let mut detective = self.state.get_detective();
+    let detective = self.state.get_detective();
     for (ref _name, ref entity) in self.state.entities.iter() {
       let entity = entity.borrow();
       if entity.name() != "detective" {

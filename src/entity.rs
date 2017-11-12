@@ -60,4 +60,10 @@ pub trait Actor {
       true
     }
   }
+
+  fn set_velocity_x(&mut self, x: f64) {
+    let mut velocity = self.velocity();
+    velocity.x = x;
+    self.set_velocity(velocity);
+  }
 }
