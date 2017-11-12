@@ -13,7 +13,8 @@ use level;
 pub struct DefaultActor {
   name: String,
   image: String,
-  position: (f64, f64),
+  position: entity::WorldPoint2,
+  velocity: entity::WorldVector2,
   scale: f64,
   visible: bool,
   active: bool,
@@ -41,7 +42,8 @@ impl DefaultActor {
     DefaultActor {
       name: actor.name.to_owned(),
       image: actor.image.to_owned(),
-      position: (actor.position.x, actor.position.y),
+      position: entity::WorldPoint2::new(actor.position.x, actor.position.y),
+      velocity: entity::WorldVector2::new(0.0, 0.0),
       scale: actor.scale,
       visible: actor.visible,
       active: actor.active,
@@ -60,8 +62,12 @@ impl entity::Actor for DefaultActor {
     self.image.clone()
   }
 
-  fn position(&self) -> (f64, f64) {
+  fn position(&self) -> entity::WorldPoint2 {
     self.position
+  }
+
+  fn velocity(&self) -> entity::WorldVector2 {
+    self.velocity
   }
 
   fn scale(&self) -> f64 {
@@ -80,11 +86,16 @@ impl entity::Actor for DefaultActor {
     self.sprite_id
   }
 
-  fn set_position(&mut self, position: (f64, f64)) -> error::Result<()> {
+  fn set_position(&mut self, position: entity::WorldPoint2) -> error::Result<()> {
     self.position = position;
     if let Some(sprite) = self.scene.borrow_mut().child_mut(self.sprite_id) {
-      sprite.set_position(self.position.0, self.position.1);
+      sprite.set_position(self.position.x, self.position.y);
     }
+    Ok(())
+  }
+
+  fn set_velocity(&mut self, velocity: entity::WorldVector2) -> error::Result<()> {
+    self.velocity = velocity;
     Ok(())
   }
 
@@ -107,6 +118,9 @@ impl entity::Actor for DefaultActor {
   fn set_active(&mut self, active: bool) -> error::Result<()> {
     self.active = active;
     Ok(())
+  }
+
+  fn on_update(&mut self, update_args: &piston_window::UpdateArgs) {
   }
 
   fn interact_hero(&mut self) {
