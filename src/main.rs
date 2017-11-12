@@ -28,6 +28,7 @@ mod default_actor;
 mod detective;
 mod entity;
 mod error;
+mod font;
 mod handler;
 mod hero;
 mod item;

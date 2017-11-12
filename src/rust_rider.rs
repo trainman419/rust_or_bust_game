@@ -1,5 +1,6 @@
 #[cfg(unix)]
 extern crate ears;
+extern crate find_folder;
 extern crate graphics;
 extern crate nalgebra;
 extern crate piston;
@@ -294,6 +295,7 @@ where Window: piston_window::OpenGLWindow,
     // Borrow member references immutably before allowing self to be borrowed
     // mutably by self.window.draw_2d().
     let window_size = self.window.borrow().size();
+    let factory = self.window.borrow().factory.clone();
 
     self.window.borrow_mut().draw_2d(event, |context, graphics| {
       let translation = self.state.camera.position;
@@ -307,6 +309,24 @@ where Window: piston_window::OpenGLWindow,
 
       piston_window::clear([1.0; 4], graphics);
       self.scene.borrow_mut().draw(transform, graphics);
+    });
+
+    self.window.borrow_mut().draw_2d(event, |c, g| {
+        let assets = find_folder::Search::ParentsThenKids(3, 3)
+            .for_folder("assets/fonts").unwrap();
+        let ref font = assets.join("Pixel-Noir.ttf");
+        let mut glyphs = piston_window::Glyphs::new(
+            font,
+            factory,
+            piston_window::TextureSettings::new().mag(piston_window::Filter::Nearest),
+        ).unwrap();
+        let transform = c.transform.trans(50.0, 100.0);
+        piston_window::text::Text::new_color([0.0, 0.0, 0.0, 1.0], 6).draw(
+            "It was a dark and stormy night ...",
+            &mut glyphs,
+            &c.draw_state,
+            transform, g
+        );
     });
 
     Ok(())
