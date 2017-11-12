@@ -50,7 +50,7 @@
       "sound": "car_horn",
       "position": {"x": 4200, "y": 300},
       "scale": 10,
-      "width": 12,
+      "width": 48,
       "visible": true,
       "reversible": true
     },
