@@ -84,12 +84,16 @@ impl SoundEffects {
     let mut path = String::from("assets/sounds/effects/");
     let mut filename = "";
     let mut max_length = 0;
-    let volume = 1.0;
+    let mut volume = 1.0;
 
     match file {
       "cans" => {
         filename = "cans.wav";
         max_length = 1500;
+      },
+      "car_horn" => {
+          filename = "car_horn.wav";
+          volume = 0.25;
       },
       "crow_squawk" => filename = "crow_squawk.wav",
       "crunchy_leaf" => filename = "crunchy_leaf.wav",
@@ -163,7 +167,7 @@ where Window: piston_window::Window,
     match button {
       &piston_window::Button::Keyboard(key) => match key {
         piston_window::Key::X => {
-          self.sound_effects.play("test");
+          self.sound_effects.play("car_horn");
         },
         // TODO: these speeds should come from config.
         piston_window::Key::Left => {
