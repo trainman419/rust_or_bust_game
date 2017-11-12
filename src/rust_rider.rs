@@ -159,6 +159,7 @@ impl SoundEffects {
       },
       "crow_squawk" => filename = "crow_squawk.wav",
       "crunchy_leaf" => filename = "crunchy_leaf.wav",
+      "foliage_rustle" => filename = "foliage_rustle.wav",
       "rocks" => filename = "rocks.wav",
       "spooked_birds" => filename = "spooked_birds.wav",
       "twig_snap" => filename = "twig_snap.wav",
