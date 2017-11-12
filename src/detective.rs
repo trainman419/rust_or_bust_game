@@ -46,6 +46,7 @@ pub struct Detective {
   state: DetectiveState,
   next_state: DetectiveState,
   last_obstacle: String,
+  direction: bool,
 }
 
 
@@ -100,6 +101,7 @@ impl Detective {
       state: DetectiveState::Idle,
       next_state: DetectiveState::Idle,
       last_obstacle: String::from(""),
+      direction: true,
     }
   }
 
@@ -171,6 +173,10 @@ impl entity::Actor for Detective {
     self.width
   }
 
+  fn direction(&self) -> bool {
+    self.direction
+  }
+
   fn bb(&self) -> graphics::types::Rectangle {
     self.scene.borrow_mut().child_mut(self.sprite_id).unwrap().bounding_box()
   }
@@ -187,8 +193,9 @@ impl entity::Actor for Detective {
     self.velocity = velocity;
     if self.velocity.x != 0.0 {
         self.next_state = DetectiveState::Walk;
+        self.direction = self.velocity.x > 0.0;
         if let Some(sprite) = self.scene.borrow_mut().child_mut(self.sprite_id) {
-          sprite.set_flip_x(self.velocity.x < 0.0);
+          sprite.set_flip_x(!self.direction);
         }
     } else {
         self.next_state = DetectiveState::Idle;

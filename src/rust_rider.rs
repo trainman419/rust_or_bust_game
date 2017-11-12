@@ -187,6 +187,20 @@ where Window: piston_window::Window,
 
     // If the detective sees the hero, make him turn around and go the other
     // way. Maybe add some text and screaming?
+    {
+      let hero_position = hero.borrow().position();
+      let det_position = detective.borrow().position();
+      let det_direction = detective.borrow().direction();
+      let dx = (hero_position.x - det_position.x).abs();
+      // If distance between detective and ghost is too close, and the ghost
+      // is visible
+      if dx < 800.0 && !hero.borrow().is_transparent() {
+        // and detective is facing the ghost...
+        if (hero_position.x > det_position.x) == det_direction {
+          println!("Detective sees the ghost!");
+        }
+      }
+    }
 
     let mut hero_position = hero.borrow().position();
     // TODO: find a better solution than padding here.

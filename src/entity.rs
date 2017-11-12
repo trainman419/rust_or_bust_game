@@ -30,6 +30,13 @@ pub trait Actor {
     level::ActorType::Static
   }
 
+  // which direction is an Actor facing?
+  // true: right
+  // false: left
+  fn direction(&self) -> bool {
+    true
+  }
+
   fn bb(&self) -> graphics::types::Rectangle;
 
   fn set_position(&mut self, position: WorldPoint2) -> error::Result<()>;
