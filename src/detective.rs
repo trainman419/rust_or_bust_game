@@ -46,6 +46,7 @@ pub struct Detective {
   state: DetectiveState,
   next_state: DetectiveState,
   last_obstacle: String,
+  last_clue: String,
   direction: bool,
 }
 
@@ -101,6 +102,7 @@ impl Detective {
       state: DetectiveState::Idle,
       next_state: DetectiveState::Idle,
       last_obstacle: String::from(""),
+      last_clue: String::from(""),
       direction: true,
     }
   }
@@ -129,9 +131,16 @@ impl Detective {
         }
       },
       level::ActorType::Clue(macguffin) => {
-        if macguffin {
-          println!("Detective found the macguffin!");
-          return true;
+        if self.last_clue != actor.name() {  
+          self.last_clue = actor.name();
+          self.set_velocity_x(0.0);
+          self.next_state = DetectiveState::Clue;
+
+          if macguffin {
+            println!("Detective found the macguffin!");
+            return true;
+          }
+
         }
       }
     }
@@ -240,6 +249,14 @@ impl entity::Actor for Detective {
       self.last_obstacle = String::from("");
     }
 
+    match self.state {
+      DetectiveState::Idle => {
+          let speed = self.speed;
+          self.set_velocity_x(speed);
+      },
+      _ => (),
+    };
+
     // update time to next frame
     self.next_frame -= update_args.dt;
 
@@ -257,12 +274,12 @@ impl entity::Actor for Detective {
           self.frame = 0;
           // Transition to next state
           self.state = self.next_state;
-          // HACK(austin): cycle states
-          //self.state = match self.state {
-          //    DetectiveState::Idle => DetectiveState::Walk,
-          //    DetectiveState::Walk => DetectiveState::Clue,
-          //    DetectiveState::Clue => DetectiveState::Idle,
-          //};
+
+          self.next_state = match self.next_state {
+              DetectiveState::Idle => DetectiveState::Idle,
+              DetectiveState::Walk => DetectiveState::Walk,
+              DetectiveState::Clue => DetectiveState::Idle,
+          };
       }
 
       // if it's time for the next frame, get the asset
