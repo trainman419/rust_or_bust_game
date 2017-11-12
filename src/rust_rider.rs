@@ -21,6 +21,7 @@ use entity;
 use error;
 use handler;
 use hero;
+use detective;
 use level;
 
 type Texture = piston_window::G2dTexture;
@@ -310,13 +311,23 @@ fn make_actor(
   assets: &assets::AssetMap,
   scene: SceneRcRef,
 ) -> Rc<RefCell<entity::Actor>> {
-  if actor.name == "hero" {
-    Rc::new(RefCell::new(hero::Hero::new(actor, assets, scene.clone())))
-  } else if actor.name == "detective" {
-    Rc::new(RefCell::new(hero::Hero::new(actor, assets, scene.clone())))
-  } else {
-    Rc::new(RefCell::new(default_actor::DefaultActor::new(actor, assets, scene.clone())))
-  }
+  Rc::new(RefCell::new(default_actor::DefaultActor::new(actor, assets, scene.clone())))
+}
+
+fn make_hero(
+  actor: &level::Actor,
+  assets: &assets::AssetMap,
+  scene: SceneRcRef,
+) -> Rc<RefCell<entity::Actor>> {
+  Rc::new(RefCell::new(hero::Hero::new(actor, assets, scene.clone())))
+}
+
+fn make_detective(
+  actor: &level::Detective,
+  assets: &assets::AssetMap,
+  scene: SceneRcRef,
+) -> Rc<RefCell<entity::Actor>> {
+  Rc::new(RefCell::new(detective::Detective::new(actor, assets, scene.clone())))
 }
 
 impl<Window> GameMode<Window>
@@ -343,6 +354,20 @@ where
         make_actor(&actor, &assets, scene.clone()),
       );
     }
+
+    // insert detective
+    let detective = level.detective;
+    state.entities.insert(
+        detective.name.to_owned(),
+        make_detective(&detective, &assets, scene.clone()),
+      );
+
+    // insert hero
+    let hero = level.hero;
+    state.entities.insert(
+        hero.name.to_owned(),
+        make_hero(&hero, &assets, scene.clone()),
+      );
 
     let mut sound_effects = SoundEffects::new();
     sound_effects.start_music();

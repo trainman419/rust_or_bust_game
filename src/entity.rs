@@ -14,7 +14,6 @@ pub type WorldVector2 = nalgebra::Vector2<f64>;
 
 pub trait Actor {
   fn name(&self) -> String;
-  fn image(&self) -> String;
   fn position(&self) -> WorldPoint2;
   fn velocity(&self) -> WorldVector2;
   fn scale(&self) -> f64;

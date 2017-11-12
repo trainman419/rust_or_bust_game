@@ -58,10 +58,6 @@ impl entity::Actor for DefaultActor {
     self.name.clone()
   }
 
-  fn image(&self) -> String {
-    self.image.clone()
-  }
-
   fn position(&self) -> entity::WorldPoint2 {
     self.position
   }

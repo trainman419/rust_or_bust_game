@@ -17,6 +17,20 @@ pub struct Actor {
   pub scale: f64,
   pub visible: bool,
   pub active: bool,
+  pub reversible: bool,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct Detective {
+  pub name: String,
+  pub idle: String,
+  pub walk: String,
+  pub clue: String,
+  pub clue_sound: String,
+  pub position: Point,
+  pub scale: f64,
+  pub visible: bool,
+  pub active: bool,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -29,6 +43,8 @@ pub struct Trigger {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Level {
   pub world_bounds: (Point, Point),
+  pub hero: Actor,
+  pub detective: Detective,
   pub actors: Vec<Actor>,
 }
 
