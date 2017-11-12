@@ -30,6 +30,7 @@ use entity::Sprited;
 use error;
 use handler;
 use hero;
+use level;
 
 enum EditMode {
   Insert,
@@ -175,6 +176,7 @@ impl SoundEffects {
       },
       "crow_squawk" => filename = "crow_squawk.wav",
       "crunchy_leaf" => filename = "crunchy_leaf.wav",
+      "foliage_rustle" => filename = "foliage_rustle.wav",
       "rocks" => filename = "rocks.wav",
       "spooked_birds" => filename = "spooked_birds.wav",
       "twig_snap" => filename = "twig_snap.wav",
@@ -205,6 +207,7 @@ impl SoundEffects {
 /// The game-ion of the Rust Rider game. The state should act as the save data
 /// for a resumable session of the game.
 pub struct State {
+  level: level::Level,
   edit_mode: EditMode,
   line_segments: Vec<LineSegment>,
   active_line_segment: Option<Point>,
@@ -216,8 +219,9 @@ pub struct State {
 
 impl State {
   /// Create a State with default values for a new game.
-  pub fn new(camera: camera::Camera2) -> State {
+  pub fn new(level: level::Level, camera: camera::Camera2) -> State {
     State {
+      level: level,
       edit_mode: EditMode::Insert,
       line_segments: Vec::new(),
       active_line_segment: None,
@@ -387,6 +391,12 @@ where Window: piston_window::OpenGLWindow,
     let window_size = self.window.borrow().size();
 
     self.window.borrow_mut().draw_2d(event, |context, graphics| {
+      let translation = self.state.camera.position;
+      let transform = context
+        .trans(-translation.x, translation.y)
+        .zoom(self.state.camera.zoom)
+        .transform;
+
       let edit_bar_color = match state.edit_mode {
         EditMode::Insert => GREEN,
         EditMode::Select => BLUE,
@@ -427,11 +437,7 @@ where Window: piston_window::OpenGLWindow,
         line.draw(&context, graphics);
       }
 
-      self.scene.borrow_mut().draw(
-        context.trans(-self.state.camera.position.x,
-                      self.state.camera.position.y).transform,
-        graphics,
-      );
+      self.scene.borrow_mut().draw(transform, graphics);
     });
 
     Ok(())
@@ -546,29 +552,31 @@ where
   ) -> GameMode<Window> {
     use piston_window::Window; // size
     let window_size = window.borrow().size();
-    let viewport = camera::WorldVector2::new(window_size.width as f64,
-                                             window_size.height as f64);
 
     let camera = camera::Camera2 {
-      viewport: viewport,
+      zoom: 1.0,
       position: camera::WorldPoint2::new(0.0, 0.0),
       velocity: camera::WorldVector2::new(0.0, 0.0),
     };
-    let assets = load_assets(&mut window.borrow_mut());
-    let mut scene = Rc::new(RefCell::new(Scene::new()));
-    let mut state = State::new(camera);
 
-    // Build the default hero
-    let hero_scale = 10.0;
-    let mut hero = hero::Hero::new(&assets, scene.clone());
-    hero.set_position(600.0, 775.0);
-    hero.set_scale(hero_scale);
+    let assets = load_assets(&mut window.borrow_mut());
+
+    let level = level::Level::from_path_str("assets/levels/sample.json")
+        .expect("Failed to load level");
+    let scene = Rc::new(RefCell::new(Scene::new()));
+    let mut state = State::new(level.clone(), camera);
+
+    for actor in level.actors.iter() {
+      if actor.name == "hero" {
+        let hero = hero::Hero::new(&actor, &assets, scene.clone());
+        state.entities.insert(actor.name.to_owned(), Rc::new(hero));
+      } else if actor.name == "detective" {
+      } else {
+      }
+    }
 
     let mut sound_effects = SoundEffects::new();
     sound_effects.start_music();
-
-    let hero_id = hero.get_sprite_id();
-    state.entities.insert(String::from("hero"), Rc::new(hero));
 
     GameMode::new_with_state(window, state, assets, scene.clone(), sound_effects)
   }
