@@ -281,7 +281,11 @@ where Window: piston_window::Window
         load_assets_from_dir(&mut window, &entry.path(), &name, &mut assets);
       } else if entry.file_type().unwrap().is_file() {
         let path = entry.path();
-        let name = prefix.to_owned() + "/" + path.file_stem().unwrap().to_str().unwrap();
+        let name = if prefix.len() > 0 {
+            prefix.to_owned() + "/" + path.file_stem().unwrap().to_str().unwrap()
+        } else {
+            path.file_stem().unwrap().to_str().unwrap().to_owned()
+        };
         if let Some(extension) = entry.path().extension() {
           match extension.to_str().unwrap() {
               "png" => {
