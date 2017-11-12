@@ -68,6 +68,7 @@ where
   assets: assets::AssetMap,
   scene: SceneRcRef,
   sound_effects: sound::SoundEffects,
+  glyphs: Rc<RefCell<piston_window::Glyphs>>,
 }
 
 /// How GameMode responds to input-events.
@@ -224,24 +225,15 @@ where Window: piston_window::OpenGLWindow,
 
       piston_window::clear([1.0; 4], graphics);
       self.scene.borrow_mut().draw(transform, graphics);
-    });
 
-    self.window.borrow_mut().draw_2d(event, |c, g| {
-        let assets = find_folder::Search::ParentsThenKids(3, 3)
-            .for_folder("assets/fonts").unwrap();
-        let ref font = assets.join("Pixel-Noir.ttf");
-        let mut glyphs = piston_window::Glyphs::new(
-            font,
-            factory,
-            piston_window::TextureSettings::new().mag(piston_window::Filter::Nearest),
-        ).unwrap();
-        let transform = c.transform.trans(50.0, 100.0);
-        piston_window::text::Text::new_color([0.0, 0.0, 0.0, 1.0], 6).draw(
-            "It was a dark and stormy night ...",
-            &mut glyphs,
-            &c.draw_state,
-            transform, g
-        );
+      let transform = context.transform.trans(50.0, 100.0);
+      piston_window::text::Text::new_color([0.0, 0.0, 0.0, 1.0], 6).draw(
+          "It was a dark and stormy night ...",
+          &mut *self.glyphs.borrow_mut(),
+          &context.draw_state,
+          transform,
+          graphics
+      );
     });
 
     Ok(())
@@ -296,7 +288,18 @@ where
     // TODO: should be loaded as an actor from level
     let camera = camera::Camera2::new();
 
+    // Load assets
     let assets = assets::load_assets(&mut window.borrow_mut());
+
+    // Load font
+    let font_dir = find_folder::Search::ParentsThenKids(3, 3)
+        .for_folder("assets/fonts").unwrap();
+    let ref font = font_dir.join("Pixel-Noir.ttf");
+    let glyphs = piston_window::Glyphs::new(
+        font,
+        window.borrow_mut().factory.clone(),
+        piston_window::TextureSettings::new().mag(piston_window::Filter::Nearest),
+    ).unwrap();
 
     let level = level::Level::from_path_str("assets/levels/sample.json")
         .expect("Failed to load level");
@@ -326,7 +329,7 @@ where
     let mut sound_effects = sound::SoundEffects::new();
     sound_effects.start_music();
 
-    GameMode::new_with_state(window, state, assets, scene.clone(), sound_effects)
+    GameMode::new_with_state(window, state, assets, scene.clone(), sound_effects, Rc::new(RefCell::new(glyphs)))
   }
 
   /// Create a GameMode with an existing State.
@@ -336,6 +339,7 @@ where
     assets: assets::AssetMap,
     scene: SceneRcRef,
     sound_effects: sound::SoundEffects,
+    glyphs: Rc<RefCell<piston_window::Glyphs>>,
   ) -> GameMode<Window> {
     GameMode {
       window,
@@ -343,6 +347,7 @@ where
       assets,
       scene,
       sound_effects,
+      glyphs,
     }
   }
 }
