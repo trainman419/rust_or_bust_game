@@ -251,7 +251,7 @@ where Window: piston_window::OpenGLWindow,
       let translation = self.state.camera.position;
       let transform = context
         .trans(
-          window_size.width as f64 - translation.x,
+          window_size.width as f64 * 0.5 - translation.x,
           window_size.height as f64 * 0.5 + translation.y,
         )
         .zoom(self.state.camera.zoom)
