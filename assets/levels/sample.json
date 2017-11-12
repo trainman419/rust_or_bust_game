@@ -1,19 +1,19 @@
 {
   "world_bounds": [
     {
-      "x": 0,
-      "y": 0
+      "x": 50,
+      "y": -500
     },
     {
-      "x": 3400,
-      "y": 1000
+      "x": 4950,
+      "y": 500
     }
   ],
   "actors": [
     {
       "name": "background",
       "image": "sprites/Dark-Forest_Background",
-      "position": {"x": 1700, "y": 0},
+      "position": {"x": 2500, "y": 0},
       "scale": 1.3,
       "visible": true,
       "active": false

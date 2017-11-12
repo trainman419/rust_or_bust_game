@@ -165,7 +165,7 @@ where Window: piston_window::Window,
         piston_window::Key::X => {
           self.sound_effects.play("test");
         },
-        // TODO: these should come from config.
+        // TODO: these speeds should come from config.
         piston_window::Key::Left => {
           if let Some(hero) = self.state.entities.get("hero") {
             let mut velocity = hero.borrow().velocity();
@@ -211,6 +211,16 @@ where Window: piston_window::Window,
   }
 }
 
+fn clamp<T: ::std::cmp::PartialOrd>(x: T, min: T, max: T) -> T {
+  if x < min {
+    min
+  } else if x > max {
+    max
+  } else {
+    x
+  }
+}
+
 /// How GameMode responds to update-events.
 impl<Window> handler::UpdateHandler for GameMode<Window>
 where Window: piston_window::Window,
@@ -220,11 +230,28 @@ where Window: piston_window::Window,
     _event: &Event,
     update_args: &piston_window::UpdateArgs,
   ) -> error::Result<()> {
+    use piston_window::Window; // size
+
     for (ref _name, ref entity) in self.state.entities.iter() {
-      entity.borrow_mut().on_update(update_args);
+      entity.borrow_mut().on_update(update_args)?;
     }
+
     if let Some(hero) = self.state.entities.get("hero") {
-      self.state.camera.position.x = hero.borrow().position().x;
+      let mut hero_position = hero.borrow().position();
+      hero_position.x = clamp(
+        hero_position.x,
+        self.state.level.world_bounds.0.x + 75.0,
+        self.state.level.world_bounds.1.x - 75.0,
+      );
+      hero.borrow_mut().set_position(hero_position)?;
+
+      let window_size = self.window.borrow().size();
+      self.state.camera.position.x = hero_position.x;
+      self.state.camera.position.x = clamp(
+        self.state.camera.position.x,
+        self.state.level.world_bounds.0.x + window_size.width as f64 * 0.5,
+        self.state.level.world_bounds.1.x - window_size.width as f64 * 0.5,
+      );
     }
 
     Ok(())
