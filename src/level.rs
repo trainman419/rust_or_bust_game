@@ -30,8 +30,7 @@ pub struct Detective {
   pub clue_sound: String,
   pub position: Point,
   pub scale: f64,
-  pub visible: bool,
-  pub active: bool,
+  pub speed: f64,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

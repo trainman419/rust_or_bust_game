@@ -28,6 +28,7 @@ pub struct Detective {
   position: entity::WorldPoint2,
   velocity: entity::WorldVector2,
   scale: f64,
+  speed: f64,
   visible: bool,
   active: bool,
   sprite_id: uuid::Uuid,
@@ -80,10 +81,11 @@ impl Detective {
     Detective {
       name: actor.name.to_owned(),
       position: entity::WorldPoint2::new(actor.position.x, actor.position.y),
-      velocity: entity::WorldVector2::new(0.0, 0.0),
+      velocity: entity::WorldVector2::new(actor.speed, 0.0),
       scale: actor.scale,
-      visible: actor.visible,
-      active: actor.active,
+      speed: actor.speed,
+      visible: true,
+      active: true,
       sprite_id: hero_id,
       scene: scene,
       idle: idle.clone(),
@@ -92,8 +94,8 @@ impl Detective {
       clue_sound: actor.clue_sound.to_owned(),
       frame,
       next_frame,
-      state: DetectiveState::Idle,
-      next_state: DetectiveState::Idle,
+      state: DetectiveState::Walk,
+      next_state: DetectiveState::Walk,
     }
   }
 }
@@ -143,9 +145,12 @@ impl entity::Actor for Detective {
   fn set_velocity(&mut self, velocity: entity::WorldVector2) -> error::Result<()> {
     self.velocity = velocity;
     if self.velocity.x != 0.0 {
+        self.next_state = DetectiveState::Walk;
         if let Some(sprite) = self.scene.borrow_mut().child_mut(self.sprite_id) {
           sprite.set_flip_x(self.velocity.x < 0.0);
         }
+    } else {
+        self.next_state = DetectiveState::Idle;
     }
     Ok(())
   }
@@ -175,6 +180,15 @@ impl entity::Actor for Detective {
     let new_position = self.position + self.velocity * update_args.dt;
     self.set_position(new_position)?;
 
+    // TODO(austin): make the detective do useful things here
+    let mut velocity = self.velocity();
+    if self.position.x > 700.0 {
+      velocity.x = -self.speed;
+    } else if self.position.x < 200.0 {
+      velocity.x = self.speed;
+    }
+    self.set_velocity(velocity);
+
     // update time to next frame
     self.next_frame -= update_args.dt;
 
@@ -191,13 +205,13 @@ impl entity::Actor for Detective {
       if self.frame >= asset.frames.len() {
           self.frame = 0;
           // Transition to next state
-          //self.state = self.next_state;
+          self.state = self.next_state;
           // HACK(austin): cycle states
-          self.state = match self.state {
-              DetectiveState::Idle => DetectiveState::Walk,
-              DetectiveState::Walk => DetectiveState::Clue,
-              DetectiveState::Clue => DetectiveState::Idle,
-          };
+          //self.state = match self.state {
+          //    DetectiveState::Idle => DetectiveState::Walk,
+          //    DetectiveState::Walk => DetectiveState::Clue,
+          //    DetectiveState::Clue => DetectiveState::Idle,
+          //};
       }
 
       // if it's time for the next frame, get the asset
