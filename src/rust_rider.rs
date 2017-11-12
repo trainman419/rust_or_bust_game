@@ -286,8 +286,8 @@ where Window: piston_window::Window
                                         &piston_window::TextureSettings::new().mag(piston_window::Filter::Nearest),
                                         ).unwrap());
                   let mut asset = assets::ImageAsset::new();
-                  asset.add_frame(texture, 0);
-                  assets.insert(name, asset);
+                  asset.add_frame(texture, 0.0);
+                  assets.insert(name, Rc::new(asset));
               }
               "gif" => {
                   use self::gif::Decoder;
@@ -313,9 +313,10 @@ where Window: piston_window::Window
                                             &dst,
                                             &piston_window::TextureSettings::new().mag(piston_window::Filter::Nearest),
                                             ).expect("Could not create Texture"));
-                      asset.add_frame(texture, frame.delay);
+                      // convert frame time from 10ms units to floating-point seconds
+                      asset.add_frame(texture, (frame.delay as f64) / 100.0);
                   }
-                  assets.insert(name, asset);
+                  assets.insert(name, Rc::new(asset));
               }
               _ => (),
           }

@@ -7,7 +7,7 @@ type Texture = piston_window::G2dTexture;
 
 pub struct Frame {
     pub texture: Rc<Texture>,
-    pub frame_time: u16, // frame delay, units of 10ms
+    pub frame_time: f64, // frame delay, units of 10ms
 }
 
 pub struct ImageAsset {
@@ -21,7 +21,7 @@ impl ImageAsset {
         }
     }
 
-    pub fn add_frame(&mut self, texture: Rc<Texture>, frame_time: u16) {
+    pub fn add_frame(&mut self, texture: Rc<Texture>, frame_time: f64) {
         self.frames.push(Frame {
             texture,
             frame_time,
@@ -29,4 +29,4 @@ impl ImageAsset {
     }
 }
 
-pub type AssetMap = HashMap<String, ImageAsset>;
+pub type AssetMap = HashMap<String, Rc<ImageAsset>>;

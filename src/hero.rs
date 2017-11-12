@@ -3,12 +3,12 @@ extern crate piston_window;
 extern crate sprite;
 extern crate uuid;
 
-use self::ai_behavior::{
-    Action,
-    Sequence,
-    WaitForever,
-    While,
-};
+//use self::ai_behavior::{
+//    Action,
+//    Sequence,
+//    WaitForever,
+//    While,
+//};
 
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -32,6 +32,10 @@ pub struct Hero {
   active: bool,
   sprite_id: uuid::Uuid,
   scene: SceneRcRef,
+  assets: assets::AssetMap, // assets for each state or animation of the hero
+  state: String,
+  frame: usize,
+  next_frame: f64,
 }
 
 
@@ -41,9 +45,21 @@ impl Hero {
     assets: &assets::AssetMap,
     scene: SceneRcRef,
   ) -> Hero {
-    let hero_texture = assets.get(&actor.image)
+    let mut hero_assets = assets::AssetMap::new();
+
+    // Get the idle asset and add it to our internal state to asset map
+    let hero_idle = assets.get(&actor.image)
         .expect("Could not find asset")
-        .frames.get(0).unwrap().texture.clone();
+        .clone();
+    hero_assets.insert(String::from("idle"), hero_idle.clone());
+
+    // Set the current state and remaining frame time
+    let state = String::from("idle");
+    let frame : usize = 0;
+    let frame0 = hero_idle.frames.get(0).unwrap();
+    let next_frame = frame0.frame_time;
+
+    let hero_texture = frame0.texture.clone();
 
     let mut hero_sprite = sprite::Sprite::from_texture(hero_texture);
 
@@ -52,13 +68,13 @@ impl Hero {
 
     let hero_id: uuid::Uuid = scene.borrow_mut().add_child(hero_sprite);
 
-    let seq = Sequence(vec![
-        While(Box::new(WaitForever), vec![
-              Action(sprite::Ease(sprite::EaseFunction::ExponentialIn, Box::new(sprite::MoveBy(3.0, 0.0, 50.0)))),
-              Action(sprite::Ease(sprite::EaseFunction::ExponentialIn, Box::new(sprite::MoveBy(3.0, 0.0, -50.0)))),
-        ]),
-        ]);
-    scene.borrow_mut().run(hero_id, &seq);
+    //let seq = Sequence(vec![
+    //    While(Box::new(WaitForever), vec![
+    //          Action(sprite::Ease(sprite::EaseFunction::ExponentialIn, Box::new(sprite::MoveBy(3.0, 0.0, 50.0)))),
+    //          Action(sprite::Ease(sprite::EaseFunction::ExponentialIn, Box::new(sprite::MoveBy(3.0, 0.0, -50.0)))),
+    //    ]),
+    //    ]);
+    //scene.borrow_mut().run(hero_id, &seq);
 
     Hero {
       name: actor.name.to_owned(),
@@ -70,6 +86,10 @@ impl Hero {
       active: actor.active,
       sprite_id: hero_id,
       scene: scene,
+      assets: hero_assets,
+      state,
+      frame,
+      next_frame,
     }
   }
 }
@@ -145,6 +165,31 @@ impl entity::Actor for Hero {
   fn on_update(&mut self, update_args: &piston_window::UpdateArgs) {
     let new_position = self.position + self.velocity * update_args.dt;
     self.position = new_position;
+
+    // update time to next frame
+    self.next_frame -= update_args.dt;
+
+    if self.next_frame <= 0.0 {
+      // if it's time for the next frame, get the asset
+      let asset = self.assets.get(&self.state).unwrap();
+
+      // get the index of the next frame
+      self.frame += 1;
+      if self.frame >= asset.frames.len() {
+          // TODO(austin): this is where we could update state to chain in the
+          // next animation
+          self.frame = 0;
+      }
+
+      // Get the next frame
+      let frame = asset.frames.get(self.frame).unwrap();
+
+      // Set the frame time and the update the sprite
+      self.next_frame += frame.frame_time;
+      if let Some(sprite) = self.scene.borrow_mut().child_mut(self.sprite_id) {
+          sprite.set_texture(frame.texture.clone());
+      }
+    }
   }
 
   fn interact_hero(&mut self) {
