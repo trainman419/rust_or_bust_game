@@ -8,7 +8,6 @@ extern crate sprite;
 
 use std::cell::RefCell;
 use std::rc::Rc;
-use std::collections::HashMap;
 use std::thread;
 use std::time;
 
