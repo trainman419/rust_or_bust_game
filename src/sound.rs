@@ -32,11 +32,11 @@ impl SoundEffects {
   #[cfg(unix)]
   pub fn start_music(&mut self) {
     if self.music.is_none() {
-        let path = String::from("assets/sounds/music/strangeness.ogg");
+        let path = String::from("assets/sounds/music/background_theme.wav");
         let handle = thread::spawn(move || {
           let mut music = Music::new(&path).unwrap();
           music.set_looping(true);
-          music.set_volume(0.25);
+          music.set_volume(0.5);
           music.play();
           while music.is_playing() {
             thread::sleep(time::Duration::from_secs(1));
@@ -64,7 +64,7 @@ impl SoundEffects {
       },
       "car_horn" => {
           filename = "car_horn.wav";
-          volume = 0.25;
+          volume = 0.1;
       },
       "crow_squawk" => filename = "crow_squawk.wav",
       "crunchy_leaf" => filename = "crunchy_leaf.wav",
