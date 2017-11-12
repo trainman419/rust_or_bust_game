@@ -10,6 +10,7 @@ use assets;
 use entity;
 use error;
 use level;
+use sound;
 
 pub struct DefaultActor {
   name: String,
@@ -166,7 +167,7 @@ impl entity::Actor for DefaultActor {
     Ok(())
   }
 
-  fn interact_hero(&mut self) {
+  fn interact_hero(&mut self, sounds: &mut sound::SoundEffects) {
     self.animating = true;
   }
 

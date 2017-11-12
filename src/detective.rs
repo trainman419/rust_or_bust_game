@@ -10,6 +10,7 @@ use assets;
 use entity;
 use error;
 use level;
+use sound;
 
 type Texture = piston_window::G2dTexture;
 type SceneRcRef = Rc<RefCell<sprite::Scene<Texture>>>;
@@ -177,7 +178,7 @@ impl entity::Actor for Detective {
     Ok(())
   }
 
-  fn interact_hero(&mut self) {
+  fn interact_hero(&mut self, sounds: &mut sound::SoundEffects) {
     println!("Hero interacted with Detective!");
   }
 

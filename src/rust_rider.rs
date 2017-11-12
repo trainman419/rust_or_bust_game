@@ -1,5 +1,3 @@
-#[cfg(unix)]
-extern crate ears;
 extern crate find_folder;
 extern crate graphics;
 extern crate nalgebra;
@@ -10,11 +8,7 @@ extern crate sprite;
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::ops::Deref;
-use std::thread;
-use std::time;
 
-#[cfg(unix)]
-use self::ears::{Sound, Music, AudioController};
 
 use assets;
 use camera;
@@ -26,100 +20,11 @@ use handler;
 use hero;
 use detective;
 use level;
+use sound;
 
 type Texture = piston_window::G2dTexture;
 type SceneRcRef = Rc<RefCell<sprite::Scene<Texture>>>;
 type Scene = sprite::Scene<Texture>;
-
-pub struct SoundEffects {
-  music: Option<thread::JoinHandle<()>>,
-  sounds: Vec<thread::JoinHandle<()>>,
-}
-
-impl SoundEffects {
-  pub fn new() -> SoundEffects {
-    SoundEffects {
-      music: None,
-      sounds: Vec::new(),
-    }
-  }
-
-  #[cfg(not(unix))]
-  pub fn start_music(&mut self) {
-    println!("Error: Cannot play sound on Windows");
-  }
-
-  #[cfg(not(unix))]
-  pub fn play(&mut self, file: &str) {
-    println!("Error: Cannot play sound on Windows");
-  }
-
-  #[cfg(unix)]
-  pub fn start_music(&mut self) {
-    if self.music.is_none() {
-        let path = String::from("assets/sounds/music/strangeness.ogg");
-        let handle = thread::spawn(move || {
-          let mut music = Music::new(&path).unwrap();
-          music.set_looping(true);
-          music.set_volume(0.25);
-          music.play();
-          while music.is_playing() {
-            thread::sleep(time::Duration::from_secs(1));
-            // Todo: Maybe something here
-          }
-        });
-        self.music = Some(handle);
-    } else {
-        println!("Stop right there criminal scum.");
-    }
-  }
-
-
-  #[cfg(unix)]
-  pub fn play(&mut self, file: &str) {
-    let mut path = String::from("assets/sounds/effects/");
-    let mut filename = "";
-    let mut max_length = 0;
-    let mut volume = 1.0;
-
-    match file {
-      "cans" => {
-        filename = "cans.wav";
-        max_length = 1500;
-      },
-      "car_horn" => {
-          filename = "car_horn.wav";
-          volume = 0.25;
-      },
-      "crow_squawk" => filename = "crow_squawk.wav",
-      "crunchy_leaf" => filename = "crunchy_leaf.wav",
-      "foliage_rustle" => filename = "foliage_rustle.wav",
-      "rocks" => filename = "rocks.wav",
-      "spooked_birds" => filename = "spooked_birds.wav",
-      "twig_snap" => filename = "twig_snap.wav",
-      _ => {}
-    }
-
-    if filename == "" {
-      println!("Could not find file: {}", file);
-      return ();
-    }
-
-    path.push_str(filename);
-    let handle = thread::spawn(move || {
-      let mut sound = Sound::new(&path).unwrap();
-        sound.set_volume(volume);
-        sound.play();
-        if max_length > 0 {
-            thread::sleep(time::Duration::from_millis(max_length));
-        } else {
-           while sound.is_playing() { }
-        }
-    });
-
-    self.sounds.push(handle);
-  }
-}
 
 /// The game-ion of the Rust Rider game. The state should act as the save data
 /// for a resumable session of the game.
@@ -162,7 +67,7 @@ where
   window: Rc<RefCell<piston_window::PistonWindow<Window>>>,
   assets: assets::AssetMap,
   scene: SceneRcRef,
-  sound_effects: SoundEffects,
+  sound_effects: sound::SoundEffects,
 }
 
 /// How GameMode responds to input-events.
@@ -201,7 +106,7 @@ where Window: piston_window::Window,
           for (ref _name, ref entity) in self.state.entities.iter() {
             if entity.borrow().overlap(&*hero.borrow()) {
               println!("Hero interacting with {}", entity.borrow().name());
-              entity.borrow_mut().interact_hero();
+              entity.borrow_mut().interact_hero(&mut self.sound_effects);
             }
           }
         }
@@ -418,7 +323,7 @@ where
     state.entities.insert(hero_cfg.name.to_owned(), hero);
 
 
-    let mut sound_effects = SoundEffects::new();
+    let mut sound_effects = sound::SoundEffects::new();
     sound_effects.start_music();
 
     GameMode::new_with_state(window, state, assets, scene.clone(), sound_effects)
@@ -430,7 +335,7 @@ where
     state: State,
     assets: assets::AssetMap,
     scene: SceneRcRef,
-    sound_effects: SoundEffects,
+    sound_effects: sound::SoundEffects,
   ) -> GameMode<Window> {
     GameMode {
       window,

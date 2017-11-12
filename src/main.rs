@@ -34,6 +34,7 @@ mod hero;
 mod item;
 mod level;
 mod rust_rider;
+mod sound;
 
 use std::cell::RefCell;
 use std::rc::Rc;

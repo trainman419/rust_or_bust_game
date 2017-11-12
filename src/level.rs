@@ -13,6 +13,7 @@ pub struct Point {
 pub struct Actor {
   pub name: String,
   pub image: String,
+  pub sound: String,
   pub position: Point,
   pub scale: f64,
   pub visible: bool,

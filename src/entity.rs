@@ -9,6 +9,7 @@ use std::rc::Rc;
 use std::collections::HashMap;
 
 use error;
+use sound;
 
 pub type EntityRcRef = Rc<RefCell<Actor>>;
 pub type EntityMap = HashMap<String, Rc<RefCell<Actor>>>;
@@ -34,7 +35,7 @@ pub trait Actor {
 
   fn on_update(&mut self, update_args: &piston_window::UpdateArgs) -> error::Result<()>;
 
-  fn interact_hero(&mut self) {
+  fn interact_hero(&mut self, sounds: &mut sound::SoundEffects) {
     // What happens when this object interacts with the hero (i.e. ghost)
   }
 
