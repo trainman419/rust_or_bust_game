@@ -216,7 +216,9 @@ where Window: piston_window::Window,
     _event: &Event,
     update_args: &piston_window::UpdateArgs,
   ) -> error::Result<()> {
-    self.state.camera.on_update(update_args);
+    for (ref _name, ref entity) in self.state.entities.iter() {
+      entity.borrow_mut().on_update(update_args);
+    }
 
     Ok(())
   }
@@ -354,13 +356,13 @@ fn make_actor(
   actor: &level::Actor,
   assets: &assets::AssetMap,
   scene: SceneRcRef,
-) -> Rc<entity::Actor> {
+) -> Rc<RefCell<entity::Actor>> {
   if actor.name == "hero" {
-    Rc::new(hero::Hero::new(actor, assets, scene.clone()))
+    Rc::new(RefCell::new(hero::Hero::new(actor, assets, scene.clone())))
   } else if actor.name == "detective" {
-    Rc::new(hero::Hero::new(actor, assets, scene.clone()))
+    Rc::new(RefCell::new(hero::Hero::new(actor, assets, scene.clone())))
   } else {
-    Rc::new(default_actor::DefaultActor::new(actor, assets, scene.clone()))
+    Rc::new(RefCell::new(default_actor::DefaultActor::new(actor, assets, scene.clone())))
   }
 }
 
