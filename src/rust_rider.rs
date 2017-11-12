@@ -1,3 +1,4 @@
+#[cfg(unix)]
 extern crate ears;
 extern crate graphics;
 extern crate nalgebra;
@@ -14,6 +15,7 @@ use std::rc::Rc;
 use std::collections::HashMap;
 use std::thread;
 
+#[cfg(unix)]
 use self::ears::{Sound, Music, AudioController};
 
 use std::fs::File;
@@ -119,6 +121,8 @@ pub struct SoundEffects {
   sounds: Vec<thread::JoinHandle<()>>,
 }
 
+
+
 impl SoundEffects {
   pub fn new() -> SoundEffects {
     SoundEffects {
@@ -126,7 +130,17 @@ impl SoundEffects {
       sounds: Vec::new(),
     }
   }
+  
+  #[cfg(not(unix))]
+  pub fn start_music(&mut self) {
+    println!("Error: Cannot play sound on Windows");
+  }
 
+  pub fn play(&mut self, file: &str) {
+    println!("Error: Cannot play sound on Windows");
+  }
+
+  #[cfg(unix)]
   pub fn start_music(&mut self) {
     if self.music.is_none() {
         let path = String::from("assets/sounds/music/strangeness.ogg");
@@ -146,6 +160,8 @@ impl SoundEffects {
     }
   }
 
+
+  #[cfg(unix)]
   pub fn play(&mut self, file: &str) {
     let mut path = String::from("assets/sounds/effects/");
     let mut filename = "";
