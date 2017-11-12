@@ -59,12 +59,13 @@ impl SoundEffects {
       sounds: Vec::new(),
     }
   }
-  
+
   #[cfg(not(unix))]
   pub fn start_music(&mut self) {
     println!("Error: Cannot play sound on Windows");
   }
 
+  #[cfg(not(unix))]
   pub fn play(&mut self, file: &str) {
     println!("Error: Cannot play sound on Windows");
   }
