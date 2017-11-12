@@ -136,6 +136,7 @@ impl SoundEffects {
           music.set_volume(0.25);
           music.play();
           while music.is_playing() {
+            thread::sleep_ms(1000);
             // Todo: Maybe something here
           }
         });
@@ -148,9 +149,19 @@ impl SoundEffects {
   pub fn play(&mut self, file: &str) {
     let mut path = String::from("assets/sounds/effects/");
     let mut filename = "";
+    let mut max_length = 0;
+    let mut volume = 1.0;
 
     match file {
-      "test" => filename = "bullet-shell.wav",
+      "cans" => {
+        filename = "cans.wav";
+        max_length = 1500;
+      },
+      "crow_squawk" => filename = "crow_squawk.wav",
+      "crunchy_leaf" => filename = "crunchy_leaf.wav",
+      "rocks" => filename = "rocks.wav",
+      "spooked_birds" => filename = "spooked_birds.wav",
+      "twig_snap" => filename = "twig_snap.wav",
       _ => {}
     }
 
@@ -162,10 +173,13 @@ impl SoundEffects {
     path.push_str(filename);
     let handle = thread::spawn(move || {
       let mut sound = Sound::new(&path).unwrap();
-      sound.play();
-      while sound.is_playing() {
-        // Todo: Maybe something here
-      }
+        sound.set_volume(volume);
+        sound.play();
+        if max_length > 0 {
+            thread::sleep_ms(max_length);
+        } else {
+           while sound.is_playing() { }
+        }
     });
 
     self.sounds.push(handle);
@@ -236,7 +250,7 @@ where Window: piston_window::Window,
           return Err(error::Error::from("Exited Game"));
         },
         piston_window::Key::X => {
-          self.sound_effects.play("test");
+          self.sound_effects.play("spooked_birds");
         },
         piston_window::Key::LShift | piston_window::Key::RShift => {
           self.state.edit_mode = EditMode::Select;
