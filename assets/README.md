@@ -1,6 +1,6 @@
 # Assets and organization
 
-Assets are broken into backgrounds (static backgrounds for levels), characters and objects.
+Assets are broken into backgrounds (static backgrounds for levels), characters, and objects.
 
 Backgrounds are stored in the backgrounds folder, and will probably be single images.
 
