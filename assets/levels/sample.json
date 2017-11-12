@@ -76,6 +76,32 @@
       "visible": true,
       "active": true,
       "reversible": true
+    },
+    {
+      "name": "body",
+      "actor_type": {
+        "Clue": true
+      },
+      "image": "objects/cairn/cairn_fall",
+      "sound": "foliage_rustle",
+      "position": {"x": 3000, "y": 300},
+      "scale": 10,
+      "width": 10,
+      "visible": true,
+      "active": true,
+      "reversible": false
+    },
+    {
+      "name": "birds",
+      "actor_type": "Obstacle",
+      "image": "objects/cairn/cairn_fall",
+      "sound": "spooked_birds",
+      "position": {"x": 3500, "y": 300},
+      "scale": 10,
+      "width": 10,
+      "visible": true,
+      "active": true,
+      "reversible": false
     }
   ]
 }

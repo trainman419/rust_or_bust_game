@@ -36,7 +36,7 @@ impl SoundEffects {
         let handle = thread::spawn(move || {
           let mut music = Music::new(&path).unwrap();
           music.set_looping(true);
-          music.set_volume(0.5);
+          music.set_volume(0.75);
           music.play();
           while music.is_playing() {
             thread::sleep(time::Duration::from_secs(1));
@@ -68,7 +68,10 @@ impl SoundEffects {
       },
       "crow_squawk" => filename = "crow_squawk.wav",
       "crunchy_leaf" => filename = "crunchy_leaf.wav",
-      "foliage_rustle" => filename = "foliage_rustle.wav",
+      "foliage_rustle" => {
+          filename = "foliage_rustle.wav";
+          max_length = 2000;
+      },
       "rocks" => filename = "rocks.wav",
       "spooked_birds" => filename = "spooked_birds.wav",
       "twig_snap" => filename = "twig_snap.wav",
