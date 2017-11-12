@@ -22,6 +22,7 @@ type SceneRcRef = Rc<RefCell<sprite::Scene<Texture>>>;
 
 
 const DEFAULT_SCALE: f64 = 1.0;
+const DEFAULT_TEXTURE: &str = "characters/hero/ghost_idle";
 
 
 pub struct Hero {
@@ -35,7 +36,7 @@ pub struct Hero {
 impl Hero {
   pub fn new(assets: &assets::AssetMap, scene: SceneRcRef) -> Hero {
 
-    let hero_texture = assets.get(&String::from("characters/detective/Detective_idle"))
+    let hero_texture = assets.get(&String::from(DEFAULT_TEXTURE))
         .expect("Could not find asset")
         .frames.get(0).unwrap().texture.clone();
 
