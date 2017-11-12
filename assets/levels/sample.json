@@ -33,6 +33,14 @@
       "scale": 10,
       "visible": true,
       "active": true
+    },
+    {
+      "name": "car",
+      "image": "objects/car/car",
+      "position": {"x": 4200, "y": 300},
+      "scale": 10,
+      "visible": true,
+      "active": true
     }
   ]
 }
