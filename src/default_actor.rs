@@ -54,7 +54,7 @@ impl DefaultActor {
       position: entity::WorldPoint2::new(actor.position.x, actor.position.y),
       velocity: entity::WorldVector2::new(0.0, 0.0),
       scale: actor.scale,
-      width: (actor.width as f64) * actor.scale / 2.0,
+      width: (actor.width as f64) * actor.scale,
       visible: actor.visible,
       active: actor.active,
       sprite_id: id,

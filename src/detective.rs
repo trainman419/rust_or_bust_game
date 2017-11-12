@@ -85,7 +85,7 @@ impl Detective {
       position: entity::WorldPoint2::new(actor.position.x, actor.position.y),
       velocity: entity::WorldVector2::new(0.0, 0.0),
       scale: actor.scale,
-      width: (actor.width as f64) * actor.scale / 2.0,
+      width: (actor.width as f64) * actor.scale,
       speed: actor.speed,
       visible: true,
       active: true,
@@ -103,7 +103,7 @@ impl Detective {
     }
   }
 
-  pub fn interact_entity(&mut self, actor: &entity::Actor) {
+  pub fn interact_entity(&mut self, actor: &entity::Actor) -> bool {
     use entity::Actor;
     // How can the detective interact with things?
     //  - barrier: detective turns around and walks the other way
@@ -129,9 +129,11 @@ impl Detective {
       level::ActorType::Clue(macguffin) => {
         if macguffin {
           println!("Detective found the macguffin!");
+          return true;
         }
       }
     }
+    false
   }
 }
 

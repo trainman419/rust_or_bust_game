@@ -54,11 +54,11 @@ pub trait Actor {
     let r2 = other.bb();
     let r2_hw = other.width() / 2.0;
 
-    let r1_x = (r1[0] + r1[2]) / 2.0;
+    let r1_x = r1[0] + (r1[2] / 2.0);
     let r1_xmin = r1_x - r1_hw;
     let r1_xmax = r1_x + r1_hw;
 
-    let r2_x = (r2[0] + r2[2]) / 2.0;
+    let r2_x = r2[0] + (r2[2] / 2.0);
     let r2_xmin = r2_x - r2_hw;
     let r2_xmax = r2_x + r2_hw;
 
