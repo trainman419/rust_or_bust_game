@@ -12,6 +12,7 @@ use level;
 
 type Texture = piston_window::G2dTexture;
 type SceneRcRef = Rc<RefCell<sprite::Scene<Texture>>>;
+pub type DetectiveRcRef = Rc<RefCell<Detective>>;
 
 
 pub struct Detective {
@@ -168,14 +169,6 @@ impl entity::Actor for Detective {
       }
     }
 
-    Ok(())
-  }
-
-  fn turn_invisible(&mut self) -> error::Result<()> {
-    Ok(())
-  }
-
-  fn unturn_invisible(&mut self) -> error::Result<()> {
     Ok(())
   }
 

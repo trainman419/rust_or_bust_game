@@ -20,6 +20,8 @@ use level;
 
 type Texture = piston_window::G2dTexture;
 type SceneRcRef = Rc<RefCell<sprite::Scene<Texture>>>;
+pub type HeroRcRef = Rc<RefCell<Hero>>;
+
 
 const INVISIBLE_OPACITY: f32 = 0.4;
 const INVISIBLE_SCALE_FACTOR: f64 = 0.8;
@@ -80,6 +82,26 @@ impl Hero {
       next_frame,
       is_invisible: false,
     }
+  }
+
+  pub fn turn_invisible(&mut self) -> error::Result<()> {
+    self.is_invisible = true;
+    if let Some(sprite) = self.scene.borrow_mut().child_mut(self.sprite_id) {
+      sprite.set_opacity(INVISIBLE_OPACITY);
+      let current_scale = sprite.get_scale();
+      sprite.set_scale(current_scale.0 * INVISIBLE_SCALE_FACTOR,
+                       current_scale.1 * INVISIBLE_SCALE_FACTOR);
+    }
+    Ok(())
+  }
+
+  pub fn unturn_invisible(&mut self) -> error::Result<()> {
+    self.is_invisible = false;
+    if let Some(sprite) = self.scene.borrow_mut().child_mut(self.sprite_id) {
+      sprite.set_opacity(1.0);
+      sprite.set_scale(self.scale, self.scale);
+    }
+    Ok(())
   }
 }
 
@@ -181,26 +203,6 @@ impl entity::Actor for Hero {
       }
     }
 
-    Ok(())
-  }
-
-  fn turn_invisible(&mut self) -> error::Result<()> {
-    self.is_invisible = true;
-    if let Some(sprite) = self.scene.borrow_mut().child_mut(self.sprite_id) {
-      sprite.set_opacity(INVISIBLE_OPACITY);
-      let current_scale = sprite.get_scale();
-      sprite.set_scale(current_scale.0 * INVISIBLE_SCALE_FACTOR,
-                       current_scale.1 * INVISIBLE_SCALE_FACTOR);
-    }
-    Ok(())
-  }
-
-  fn unturn_invisible(&mut self) -> error::Result<()> {
-    self.is_invisible = false;
-    if let Some(sprite) = self.scene.borrow_mut().child_mut(self.sprite_id) {
-      sprite.set_opacity(1.0);
-      sprite.set_scale(self.scale, self.scale);
-    }
     Ok(())
   }
 

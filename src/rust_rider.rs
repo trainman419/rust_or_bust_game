@@ -18,6 +18,7 @@ use assets;
 use camera;
 use default_actor;
 use entity;
+use entity::Actor;
 use error;
 use handler;
 use hero;
@@ -124,8 +125,8 @@ pub struct State {
   level: level::Level,
   camera: camera::Camera2,
   entities: entity::EntityMap,
-  hero: Option<entity::EntityRcRef>,
-  detective: Option<entity::EntityRcRef>,
+  hero: Option<hero::HeroRcRef>,
+  detective: Option<detective::DetectiveRcRef>,
 }
 
 impl State {
@@ -140,12 +141,12 @@ impl State {
     }
   }
 
-  pub fn get_hero(&self) -> entity::EntityRcRef {
+  pub fn get_hero(&self) -> hero::HeroRcRef {
     let hero_opt = self.hero.clone();
     hero_opt.unwrap()
   }
 
-  pub fn get_detective(&self) -> entity::EntityRcRef {
+  pub fn get_detective(&self) -> detective::DetectiveRcRef {
     let detective_opt = self.detective.clone();
     detective_opt.unwrap()
   }
@@ -215,9 +216,8 @@ where Window: piston_window::Window,
           hero.borrow_mut().set_velocity(velocity)?;
         },
         piston_window::Key::LShift => {
-          if let Some(hero) = self.state.entities.get("hero") {
-            hero.borrow_mut().unturn_invisible()?;
-          }
+          let mut hero = self.state.get_hero();
+          hero.borrow_mut().unturn_invisible()?;
         },
         _ => {},
       },
@@ -338,7 +338,7 @@ fn make_hero(
   actor: &level::Actor,
   assets: &assets::AssetMap,
   scene: SceneRcRef,
-) -> Rc<RefCell<entity::Actor>> {
+) -> hero::HeroRcRef {
   Rc::new(RefCell::new(hero::Hero::new(actor, assets, scene.clone())))
 }
 
@@ -346,7 +346,7 @@ fn make_detective(
   actor: &level::Detective,
   assets: &assets::AssetMap,
   scene: SceneRcRef,
-) -> Rc<RefCell<entity::Actor>> {
+) -> detective::DetectiveRcRef {
   Rc::new(RefCell::new(detective::Detective::new(actor, assets, scene.clone())))
 }
 

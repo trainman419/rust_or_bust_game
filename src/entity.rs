@@ -30,9 +30,6 @@ pub trait Actor {
 
   fn on_update(&mut self, update_args: &piston_window::UpdateArgs) -> error::Result<()>;
 
-  fn turn_invisible(&mut self) -> error::Result<()>;
-  fn unturn_invisible(&mut self) -> error::Result<()>;
-
   fn interact_hero(&mut self) {
     // What happens when this object interacts with the hero (i.e. ghost)
   }
