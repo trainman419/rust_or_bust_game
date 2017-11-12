@@ -372,6 +372,12 @@ where Window: piston_window::OpenGLWindow,
     let window_size = self.window.borrow().size();
 
     self.window.borrow_mut().draw_2d(event, |context, graphics| {
+      let translation = self.state.camera.position;
+      let transform = context
+        .trans(-translation.x, translation.y)
+        .zoom(self.state.camera.zoom)
+        .transform;
+
       let edit_bar_color = match state.edit_mode {
         EditMode::Insert => GREEN,
         EditMode::Select => BLUE,
@@ -412,11 +418,7 @@ where Window: piston_window::OpenGLWindow,
         line.draw(&context, graphics);
       }
 
-      self.scene.borrow_mut().draw(
-        context.trans(-self.state.camera.position.x,
-                      self.state.camera.position.y).transform,
-        graphics,
-      );
+      self.scene.borrow_mut().draw(transform, graphics);
     });
 
     Ok(())
@@ -531,11 +533,9 @@ where
   ) -> GameMode<Window> {
     use piston_window::Window; // size
     let window_size = window.borrow().size();
-    let viewport = camera::WorldVector2::new(window_size.width as f64,
-                                             window_size.height as f64);
 
     let camera = camera::Camera2 {
-      viewport: viewport,
+      zoom: 1.0,
       position: camera::WorldPoint2::new(0.0, 0.0),
       velocity: camera::WorldVector2::new(0.0, 0.0),
     };
