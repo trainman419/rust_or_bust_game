@@ -112,7 +112,6 @@ impl Detective {
   }
 
   pub fn interact_entity(&mut self, actor: &entity::Actor, sounds: &mut sound::SoundEffects) {
-    use entity::Actor;
     // How can the detective interact with things?
     //  - barrier: detective turns around and walks the other way
     //  - clue: detective stops, inspects
@@ -220,7 +219,7 @@ impl entity::Actor for Detective {
     Ok(())
   }
 
-  fn set_velocity(&mut self, velocity: entity::WorldVector2) -> error::Result<()> {
+  fn set_velocity(&mut self, _velocity: entity::WorldVector2) -> error::Result<()> {
     Ok(())
   }
 
@@ -271,12 +270,10 @@ impl entity::Actor for Detective {
     // HACK(austin): keep the detective from wandering off screen
     // TODO(austin): don't use hardcoded world bounds here
     if self.position.x > 4800.0 {
-      let speed = -self.speed;
       self.set_direction(false);
       self.last_obstacle = String::from("");
       self.last_clue = String::from("");
     } else if self.position.x < 150.0 {
-      let speed = self.speed;
       self.set_direction(true);
       self.last_obstacle = String::from("");
       self.last_clue = String::from("");
