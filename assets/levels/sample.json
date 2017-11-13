@@ -24,7 +24,7 @@
       "idle": "characters/detective/Detective_idle",
       "walk": "characters/detective/Detective_walk",
       "clue": "characters/detective/Detective_clue",
-      "clue_sound": "",
+      "clue_sound": "clue",
       "position": {"x": 750, "y": 300},
       "scale": 10,
       "width": 12,

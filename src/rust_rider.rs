@@ -178,7 +178,7 @@ where Window: piston_window::Window,
       let entity = entity.borrow();
       if entity.name() != "detective" {
         if entity.overlap(&*detective.borrow()) {
-          if detective.borrow_mut().interact_entity(&*entity) {
+          if detective.borrow_mut().interact_entity(&*entity, &mut self.sound_effects) {
             // TODO(austin): game success!
           }
         }

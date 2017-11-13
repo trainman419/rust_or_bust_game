@@ -105,7 +105,7 @@ impl Detective {
     }
   }
 
-  pub fn interact_entity(&mut self, actor: &entity::Actor) -> bool {
+  pub fn interact_entity(&mut self, actor: &entity::Actor, sounds: &mut sound::SoundEffects) -> bool {
     use entity::Actor;
     // How can the detective interact with things?
     //  - barrier: detective turns around and walks the other way
@@ -132,6 +132,7 @@ impl Detective {
         if self.last_clue != actor.name() {  
           self.last_clue = actor.name();
           self.next_state = DetectiveState::Clue;
+          sounds.play(&self.clue_sound);
 
           if macguffin {
             println!("Detective found the macguffin!");
