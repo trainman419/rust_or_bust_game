@@ -26,7 +26,6 @@ enum DetectiveState {
 pub struct Detective {
   name: String,
   position: entity::WorldPoint2,
-  velocity: entity::WorldVector2,
   scale: f64,
   speed: f64,
   width: f64,
@@ -85,7 +84,6 @@ impl Detective {
     Detective {
       name: actor.name.to_owned(),
       position: entity::WorldPoint2::new(actor.position.x, actor.position.y),
-      velocity: entity::WorldVector2::new(0.0, 0.0),
       scale: actor.scale,
       width: (actor.width as f64) * actor.scale,
       speed: actor.speed,
@@ -124,16 +122,15 @@ impl Detective {
 
           // if this obstacle is "active", walk the other way
           if actor.active() {
-            let mut velocity = self.velocity;
-            velocity.x = -velocity.x;
-            self.set_velocity(velocity);
+            let dir = !self.direction;
+            self.set_direction(dir);
+            self.last_clue = String::from("");
           }
         }
       },
       level::ActorType::Clue(macguffin) => {
         if self.last_clue != actor.name() {  
           self.last_clue = actor.name();
-          self.set_velocity_x(0.0);
           self.next_state = DetectiveState::Clue;
 
           if macguffin {
@@ -149,12 +146,17 @@ impl Detective {
 
   pub fn run_away(&mut self) {
     use entity::Actor;
-    let mut speed = self.speed;
-    if self.direction {
-      speed = -speed;
-    }
     self.last_obstacle = String::from("");
-    self.set_velocity_x(speed);
+    let dir = !self.direction;
+    self.set_direction(dir);
+    self.next_state = DetectiveState::Walk;
+  }
+
+  pub fn set_direction(&mut self, dir: bool) {
+    self.direction = dir;
+    if let Some(sprite) = self.scene.borrow_mut().child_mut(self.sprite_id) {
+      sprite.set_flip_x(!self.direction);
+    }
   }
 }
 
@@ -169,7 +171,7 @@ impl entity::Actor for Detective {
   }
 
   fn velocity(&self) -> entity::WorldVector2 {
-    self.velocity
+    entity::WorldVector2::new(0.0, 0.0)
   }
 
   fn scale(&self) -> f64 {
@@ -209,16 +211,6 @@ impl entity::Actor for Detective {
   }
 
   fn set_velocity(&mut self, velocity: entity::WorldVector2) -> error::Result<()> {
-    self.velocity = velocity;
-    if self.velocity.x != 0.0 {
-        self.next_state = DetectiveState::Walk;
-        self.direction = self.velocity.x > 0.0;
-        if let Some(sprite) = self.scene.borrow_mut().child_mut(self.sprite_id) {
-          sprite.set_flip_x(!self.direction);
-        }
-    } else {
-        self.next_state = DetectiveState::Idle;
-    }
     Ok(())
   }
 
@@ -244,28 +236,33 @@ impl entity::Actor for Detective {
   }
 
   fn on_update(&mut self, update_args: &piston_window::UpdateArgs) -> error::Result<()> {
-    let new_position = self.position + self.velocity * update_args.dt;
-    self.set_position(new_position)?;
+    // motion update if detective is in walking state 
+    match self.state {
+      DetectiveState::Walk => {
+        let velocity = if self.direction {
+          entity::WorldVector2::new(self.speed, 0.0)
+        } else {
+          entity::WorldVector2::new(-self.speed, 0.0)
+        };
+        let new_position = self.position + velocity * update_args.dt;
+        self.set_position(new_position)?;
+      },
+      _ => (),
+    }
 
     // HACK(austin): keep the detective from wandering off screen
     // TODO(austin): don't use hardcoded world bounds here
     if self.position.x > 4800.0 {
       let speed = -self.speed;
-      self.set_velocity_x(speed);
+      self.set_direction(false);
       self.last_obstacle = String::from("");
+      self.last_clue = String::from("");
     } else if self.position.x < 150.0 {
       let speed = self.speed;
-      self.set_velocity_x(speed);
+      self.set_direction(true);
       self.last_obstacle = String::from("");
+      self.last_clue = String::from("");
     }
-
-    match self.state {
-      DetectiveState::Idle => {
-          let speed = self.speed;
-          self.set_velocity_x(speed);
-      },
-      _ => (),
-    };
 
     // update time to next frame
     self.next_frame -= update_args.dt;
@@ -285,10 +282,12 @@ impl entity::Actor for Detective {
           // Transition to next state
           self.state = self.next_state;
 
+          // Next-next state; this determines if a state is a one-shot or if
+          // it continues
           self.next_state = match self.next_state {
               DetectiveState::Idle => DetectiveState::Idle,
               DetectiveState::Walk => DetectiveState::Walk,
-              DetectiveState::Clue => DetectiveState::Idle,
+              DetectiveState::Clue => DetectiveState::Walk,
           };
       }
 
@@ -314,8 +313,7 @@ impl entity::Actor for Detective {
 
   fn interact_hero(&mut self, _sounds: &mut sound::SoundEffects) {
     println!("Hero interacted with Detective!");
-    let speed = self.speed;
-    self.set_velocity_x(speed);
+    self.next_state = DetectiveState::Walk;
   }
 
   fn interact_detective(&mut self) {
