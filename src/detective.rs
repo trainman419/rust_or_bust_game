@@ -48,6 +48,8 @@ pub struct Detective {
   last_obstacle: String,
   last_clue: String,
   direction: bool,
+  found_macguffin: bool,
+  done: bool,
 }
 
 
@@ -104,10 +106,12 @@ impl Detective {
       last_obstacle: String::from(""),
       last_clue: String::from(""),
       direction: true,
+      found_macguffin: false,
+      done: false,
     }
   }
 
-  pub fn interact_entity(&mut self, actor: &entity::Actor, sounds: &mut sound::SoundEffects) -> bool {
+  pub fn interact_entity(&mut self, actor: &entity::Actor, sounds: &mut sound::SoundEffects) {
     use entity::Actor;
     // How can the detective interact with things?
     //  - barrier: detective turns around and walks the other way
@@ -138,13 +142,11 @@ impl Detective {
 
           if macguffin {
             println!("Detective found the macguffin!");
-            return true;
+            self.found_macguffin = true;
           }
-
         }
       }
     }
-    false
   }
 
   pub fn run_away(&mut self) {
@@ -161,6 +163,10 @@ impl Detective {
     if let Some(sprite) = self.scene.borrow_mut().child_mut(self.sprite_id) {
       sprite.set_flip_x(!self.direction);
     }
+  }
+
+  pub fn done(&self) -> bool {
+    self.done
   }
 }
 
@@ -297,9 +303,18 @@ impl entity::Actor for Detective {
           // Next-next state; this determines if a state is a one-shot or if
           // it continues
           self.next_state = match self.next_state {
-              DetectiveState::Idle => DetectiveState::Idle,
+              DetectiveState::Idle => {
+                self.done = self.found_macguffin;
+                DetectiveState::Idle
+              }
               DetectiveState::Walk => DetectiveState::Walk,
-              DetectiveState::Clue => DetectiveState::Walk,
+              DetectiveState::Clue => {
+                if self.found_macguffin {
+                  DetectiveState::Idle
+                } else {
+                  DetectiveState::Walk
+                }
+              }
           };
       }
 

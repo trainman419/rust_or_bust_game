@@ -181,11 +181,13 @@ where Window: piston_window::Window,
       let entity = entity.borrow();
       if entity.name() != "detective" {
         if entity.overlap(&*detective.borrow()) {
-          if detective.borrow_mut().interact_entity(&*entity, &mut self.sound_effects) {
-            // TODO(austin): game success!
-          }
+          detective.borrow_mut().interact_entity(&*entity, &mut self.sound_effects);
         }
       }
+    }
+
+    if detective.borrow().done() {
+      println!("The detective found your body! You win!")
     }
 
     // If the detective sees the hero, make him turn around and go the other
