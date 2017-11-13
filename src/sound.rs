@@ -66,6 +66,10 @@ impl SoundEffects {
           filename = "car_horn.wav";
           volume = 0.1;
       },
+      "clue" => {
+          volume = 0.50;
+          filename = "clue.wav";
+      },
       "crow_squawk" => filename = "crow_squawk.wav",
       "crunchy_leaf" => filename = "crunchy_leaf.wav",
       "foliage_rustle" => {

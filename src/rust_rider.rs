@@ -81,7 +81,7 @@ where Window: piston_window::Window,
     match button {
       &piston_window::Button::Keyboard(key) => match key {
         piston_window::Key::X => {
-          self.sound_effects.play("car_horn");
+          self.sound_effects.play("clue");
         },
         // TODO: these speeds should come from config.
         piston_window::Key::Left => {
