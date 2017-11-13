@@ -35,6 +35,7 @@ pub struct State {
   detective: Option<detective::DetectiveRcRef>,
   win: bool,
   title_text: font::FontTransition,
+  hint_text: font::FontTransition,
 }
 
 impl State {
@@ -50,6 +51,9 @@ impl State {
       title_text: font::FontTransition::new("It was a dark and stormy night...",
                                             "And you've just been murdered in cold blood.",
                                             10),
+      hint_text: font::FontTransition::new("Use the arrow keys to haunt around",
+                                           "LShift to materialize, Space to interact",
+                                           15),
     }
   }
 
@@ -299,6 +303,16 @@ where Window: piston_window::OpenGLWindow,
           transform,
           graphics
       ).expect("Failed drawing main story text");
+
+      let transform = context.transform.trans((window_size.width/2 + 200) as f64,
+                                              (window_size.height - 35) as f64);
+      piston_window::text::Text::new_color([1.0, 1.0, 1.0, 1.0], 3).draw(
+          &self.state.hint_text.current_text(),
+          &mut *self.glyphs.borrow_mut(),
+          &context.draw_state,
+          transform,
+          graphics
+      ).expect("Failed drawing hint text");
     });
 
     Ok(())
