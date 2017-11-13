@@ -44,7 +44,7 @@
     {
       "name": "car",
       "actor_type": {
-        "Clue": true
+        "Clue": false
       },
       "image": "objects/car/car",
       "sound": "car_horn",
