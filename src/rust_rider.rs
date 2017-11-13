@@ -199,6 +199,7 @@ where Window: piston_window::Window,
         if (hero_position.x > det_position.x) == det_direction {
           println!("Detective sees the ghost!");
           detective.borrow_mut().run_away();
+          // TODO(austin): startled or scream noise
         }
       }
     }
