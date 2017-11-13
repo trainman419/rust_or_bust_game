@@ -198,6 +198,7 @@ where Window: piston_window::Window,
         // and detective is facing the ghost...
         if (hero_position.x > det_position.x) == det_direction {
           println!("Detective sees the ghost!");
+          detective.borrow_mut().run_away();
         }
       }
     }
