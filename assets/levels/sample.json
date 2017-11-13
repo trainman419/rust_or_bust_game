@@ -96,9 +96,9 @@
       },
       "image": "objects/body/body",
       "sound": "foliage_rustle",
-      "position": {"x": 4000, "y": 300},
+      "position": {"x": 4000, "y": 350},
       "scale": 10,
-      "width": 10,
+      "width": 54,
       "visible": true,
       "active": true,
       "reversible": false
