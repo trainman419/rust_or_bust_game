@@ -34,6 +34,7 @@ pub struct State {
   hero: Option<hero::HeroRcRef>,
   detective: Option<detective::DetectiveRcRef>,
   win: bool,
+  title_text: font::FontTransition,
 }
 
 impl State {
@@ -46,6 +47,9 @@ impl State {
       hero: None,
       detective: None,
       win: false,
+      title_text: font::FontTransition::new("It was a dark and stormy night...",
+                                            "And you've just been murdered in cold blood.",
+                                            10),
     }
   }
 
@@ -273,8 +277,10 @@ where Window: piston_window::OpenGLWindow,
       for (ref _name, ref entity) in self.state.entities.iter() {
         let entity = entity.borrow();
         if entity.text().len() > 0 {
-          let label_tf = transform.trans(entity.position().x,
-                                         entity.position().y - 150.0);
+          // Add some magic numbers to make the text line up in the right spot
+          // TODO(daniel): Figure out how to center the text
+          let label_tf = transform.trans(entity.position().x - 35.0,
+                                         entity.position().y - 125.0);
           piston_window::text::Text::new_color([1.0, 1.0, 1.0, 1.0], 4).draw(
               entity.text(),
               &mut *self.glyphs.borrow_mut(),
@@ -287,7 +293,7 @@ where Window: piston_window::OpenGLWindow,
 
       let transform = context.transform.trans(50.0, 100.0);
       piston_window::text::Text::new_color([0.0, 0.0, 0.0, 1.0], 6).draw(
-          "It was a dark and stormy night ...",
+          &self.state.title_text.current_text(),
           &mut *self.glyphs.borrow_mut(),
           &context.draw_state,
           transform,
