@@ -33,6 +33,7 @@ pub struct State {
   entities: entity::EntityMap,
   hero: Option<hero::HeroRcRef>,
   detective: Option<detective::DetectiveRcRef>,
+  win: bool,
 }
 
 impl State {
@@ -44,6 +45,7 @@ impl State {
       entities: entity::EntityMap::new(),
       hero: None,
       detective: None,
+      win: false,
     }
   }
 
@@ -187,7 +189,12 @@ where Window: piston_window::Window,
     }
 
     if detective.borrow().done() {
-      println!("The detective found your body! You win!")
+      hero.borrow_mut().ascend();
+    }
+
+    if hero.borrow().won() && !self.state.win {
+      println!("The detective found your body! You win!");
+      self.state.win = true;
     }
 
     // If the detective sees the hero, make him turn around and go the other

@@ -11,7 +11,8 @@
   ],
   "hero": {
       "name": "hero",
-      "image": "characters/hero/ghost_idle",
+      "idle": "characters/hero/ghost_idle",
+      "ascend": "characters/hero/ghost_ascend",
       "sound": "",
       "position": {"x": 4000, "y": 300},
       "scale": 10,

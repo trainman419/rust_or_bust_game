@@ -28,6 +28,12 @@ pub type HeroRcRef = Rc<RefCell<Hero>>;
 const TRANSPARENT_OPACITY: f32 = 0.4;
 const TRANSPARENT_SCALE_FACTOR: f64 = 0.8;
 
+#[derive(Copy, Clone)]
+enum HeroState {
+  Idle,
+  Ascend,
+  Done,
+}
 
 pub struct Hero {
   name: String,
@@ -41,9 +47,12 @@ pub struct Hero {
   sprite_id: uuid::Uuid,
   scene: SceneRcRef,
   idle: Rc<assets::ImageAsset>,
+  ascend: Rc<assets::ImageAsset>,
   frame: usize,
   next_frame: f64,
   transparent: bool,
+  state: HeroState,
+  next_state: HeroState,
 }
 
 
@@ -54,7 +63,10 @@ impl Hero {
     scene: SceneRcRef,
   ) -> Hero {
     // Get the idle asset and add it to our internal state to asset map
-    let hero_idle = assets.get(&actor.image)
+    let hero_idle = assets.get(&actor.idle)
+        .expect("Could not find asset")
+        .clone();
+    let hero_ascend = assets.get(&actor.ascend)
         .expect("Could not find asset")
         .clone();
 
@@ -86,9 +98,12 @@ impl Hero {
       sprite_id: hero_id,
       scene: scene,
       idle: hero_idle.clone(),
+      ascend: hero_ascend.clone(),
       frame,
       next_frame,
       transparent: true,
+      state: HeroState::Idle,
+      next_state: HeroState::Idle,
     }
   }
 
@@ -114,6 +129,21 @@ impl Hero {
       sprite.set_scale(self.scale, self.scale);
     }
     Ok(())
+  }
+
+  pub fn ascend(&mut self) {
+    self.next_state = match self.next_state {
+        HeroState::Idle => HeroState::Ascend,
+        HeroState::Ascend => HeroState::Ascend,
+        HeroState::Done => HeroState::Done,
+    }
+  }
+
+  pub fn won(&self) -> bool {
+    match self.state {
+      HeroState::Done => true,
+      _ => false,
+    }
   }
 }
 
@@ -211,7 +241,11 @@ impl entity::Actor for Hero {
 
     if self.next_frame <= 0.0 {
       // if it's time for the next frame, get the asset
-      let asset = &self.idle;
+      let asset = match self.state {
+        HeroState::Idle => &self.idle,
+        HeroState::Ascend => &self.ascend,
+        HeroState::Done => &self.ascend,
+      };
 
       // get the index of the next frame
       self.frame += 1;
@@ -219,9 +253,26 @@ impl entity::Actor for Hero {
           // TODO(austin): this is where we could update state to chain in the
           // next animation
           self.frame = 0;
+          self.state = self.next_state;
+
+          self.next_state = match self.next_state {
+            HeroState::Idle => HeroState::Idle,
+            HeroState::Ascend => HeroState::Done,
+            HeroState::Done => HeroState::Done,
+          };
       }
 
+      let asset = match self.state {
+        HeroState::Idle => &self.idle,
+        HeroState::Ascend => &self.ascend,
+        HeroState::Done => &self.ascend,
+      };
+
       // Get the next frame
+      self.frame = match self.state{
+        HeroState::Done => asset.frames.len()-1,
+        _ => self.frame,
+      };
       let frame = asset.frames.get(self.frame).unwrap();
 
       // Set the frame time and the update the sprite

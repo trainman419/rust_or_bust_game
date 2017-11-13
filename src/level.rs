@@ -35,7 +35,8 @@ pub struct Actor {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Hero {
   pub name: String,
-  pub image: String,
+  pub idle: String,
+  pub ascend: String,
   pub sound: String,
   pub position: Point,
   pub scale: f64,
