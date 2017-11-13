@@ -50,11 +50,16 @@ impl State {
       detective: None,
       win: false,
       found: false,
-      title_text: font::FontTransition::new("It was a dark and stormy night...",
-                                            "And you've just been murdered in cold blood.",
+      title_text: font::FontTransition::new(vec![
+                                              String::from("It was a dark and stormy night..."),
+                                              String::from("And you've just been murdered in cold blood."),
+                                              String::from("Go find help."),
+                                            ],
                                             10),
-      hint_text: font::FontTransition::new("Use the arrow keys to haunt around",
-                                           "LShift to materialize, Space to interact",
+      hint_text: font::FontTransition::new(vec![
+                                             String::from("Use the arrow keys to haunt around"),
+                                             String::from("LShift to materialize, Space to interact"),
+                                           ],
                                            15),
     }
   }
@@ -200,9 +205,12 @@ where Window: piston_window::Window,
     if detective.borrow().done() && !self.state.found {
       hero.borrow_mut().ascend();
       self.state.found = true;
-      self.state.title_text = font::FontTransition::new("The detective found your body!",
-                                            "You win! ... ?",
-                                            4);
+      self.state.title_text = font::FontTransition::new(vec![
+          String::from("The detective found your body!"),
+          String::from("You may finally move on to the afterlife"),
+          String::from("You win! ... ?"),
+        ],
+        4);
     }
 
     if hero.borrow().won() && !self.state.win {
