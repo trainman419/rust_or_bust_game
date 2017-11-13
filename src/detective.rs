@@ -161,7 +161,6 @@ impl Detective {
     if let Some(sprite) = self.scene.borrow_mut().child_mut(self.sprite_id) {
       sprite.set_flip_x(!self.direction);
     }
-    self.set_velocity_x(speed);
   }
 }
 
