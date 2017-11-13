@@ -29,6 +29,7 @@ pub struct Detective {
   scale: f64,
   speed: f64,
   width: f64,
+  text: String,
   visible: bool,
   active: bool,
   sprite_id: uuid::Uuid,
@@ -86,6 +87,7 @@ impl Detective {
       position: entity::WorldPoint2::new(actor.position.x, actor.position.y),
       scale: actor.scale,
       width: (actor.width as f64) * actor.scale,
+      text: String::from(""),
       speed: actor.speed,
       visible: true,
       active: true,
@@ -151,6 +153,7 @@ impl Detective {
     let dir = !self.direction;
     self.set_direction(dir);
     self.next_state = DetectiveState::Walk;
+    self.set_text(String::from("Aaaaah!!!"));
   }
 
   pub fn set_direction(&mut self, dir: bool) {
@@ -158,6 +161,7 @@ impl Detective {
     if let Some(sprite) = self.scene.borrow_mut().child_mut(self.sprite_id) {
       sprite.set_flip_x(!self.direction);
     }
+    self.set_velocity_x(speed);
   }
 }
 
@@ -233,6 +237,14 @@ impl entity::Actor for Detective {
 
   fn set_active(&mut self, active: bool) -> error::Result<()> {
     self.active = active;
+    Ok(())
+  }
+
+  fn text(&self) -> &String {
+    &self.text
+  }
+  fn set_text(&mut self, new_text: String) -> error::Result<()> {
+    self.text = new_text;
     Ok(())
   }
 

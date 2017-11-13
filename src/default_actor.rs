@@ -18,6 +18,7 @@ pub struct DefaultActor {
   velocity: entity::WorldVector2,
   scale: f64,
   width: f64,
+  text: String,
   visible: bool,
   active: bool,
   sprite_id: uuid::Uuid,
@@ -55,6 +56,7 @@ impl DefaultActor {
       velocity: entity::WorldVector2::new(0.0, 0.0),
       scale: actor.scale,
       width: (actor.width as f64) * actor.scale,
+      text: String::from(""),
       visible: actor.visible,
       active: actor.active,
       sprite_id: id,
@@ -102,6 +104,15 @@ impl entity::Actor for DefaultActor {
 
   fn width(&self) -> f64 {
     self.width
+  }
+
+  fn text(&self) -> &String {
+    &self.text
+  }
+
+  fn set_text(&mut self, new_text: String) -> error::Result<()> {
+    self.text = new_text;
+    Ok(())
   }
 
   fn actor_type(&self) -> level::ActorType {

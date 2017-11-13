@@ -26,6 +26,7 @@ pub trait Actor {
   fn active(&self) -> bool;
   fn sprite_id(&self) -> uuid::Uuid;
   fn width(&self) -> f64;
+  fn text(&self) -> &String;
   fn actor_type(&self) -> level::ActorType {
     level::ActorType::Static
   }
@@ -39,6 +40,7 @@ pub trait Actor {
 
   fn bb(&self) -> graphics::types::Rectangle;
 
+  fn set_text(&mut self, new_text: String) -> error::Result<()>;
   fn set_position(&mut self, position: WorldPoint2) -> error::Result<()>;
   fn set_velocity(&mut self, velocity: WorldVector2) -> error::Result<()>;
   fn set_scale(&mut self, scale: f64) -> error::Result<()>;

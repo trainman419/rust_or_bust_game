@@ -14,6 +14,7 @@ use default_actor;
 use entity;
 use entity::Actor;
 use error;
+use font;
 use handler;
 use hero;
 use detective;
@@ -98,6 +99,7 @@ where Window: piston_window::Window,
         },
         piston_window::Key::LShift => {
           let mut hero = self.state.get_hero();
+          hero.borrow_mut().set_text(String::from("Boo!"));
           hero.borrow_mut().turn_opaque()?;
         },
         piston_window::Key::Space => {
@@ -132,6 +134,7 @@ where Window: piston_window::Window,
         },
         piston_window::Key::LShift => {
           let mut hero = self.state.get_hero();
+          hero.borrow_mut().set_text(String::from(""));
           hero.borrow_mut().turn_transparent()?;
         },
         _ => {},
@@ -257,6 +260,22 @@ where Window: piston_window::OpenGLWindow,
       piston_window::clear([1.0; 4], graphics);
       self.scene.borrow_mut().draw(transform, graphics);
 
+      // Draw text labels over all actors with text
+      for (ref _name, ref entity) in self.state.entities.iter() {
+        let entity = entity.borrow();
+        if entity.text().len() > 0 {
+          let label_tf = transform.trans(entity.position().x,
+                                         entity.position().y - 150.0);
+          piston_window::text::Text::new_color([1.0, 1.0, 1.0, 1.0], 4).draw(
+              entity.text(),
+              &mut *self.glyphs.borrow_mut(),
+              &context.draw_state,
+              label_tf,
+              graphics
+          );
+        }
+      }
+
       let transform = context.transform.trans(50.0, 100.0);
       piston_window::text::Text::new_color([0.0, 0.0, 0.0, 1.0], 6).draw(
           "It was a dark and stormy night ...",
@@ -323,14 +342,7 @@ where
     let assets = assets::load_assets(&mut window.borrow_mut());
 
     // Load font
-    let font_dir = find_folder::Search::ParentsThenKids(3, 3)
-        .for_folder("assets/fonts").unwrap();
-    let ref font = font_dir.join("Pixel-Noir.ttf");
-    let glyphs = piston_window::Glyphs::new(
-        font,
-        window.borrow_mut().factory.clone(),
-        piston_window::TextureSettings::new().mag(piston_window::Filter::Nearest),
-    ).unwrap();
+    let glyphs = font::load_font(String::from("Pixel-Noir.ttf"), &mut window.borrow_mut());
 
     let level = level::Level::from_path_str("assets/levels/sample.json")
         .expect("Failed to load level");
@@ -360,7 +372,11 @@ where
     let mut sound_effects = sound::SoundEffects::new();
     sound_effects.start_music();
 
-    GameMode::new_with_state(window, state, scene.clone(), sound_effects, Rc::new(RefCell::new(glyphs)))
+    GameMode::new_with_state(window,
+                             state,
+                             scene.clone(),
+                             sound_effects,
+                             glyphs)
   }
 
   /// Create a GameMode with an existing State.

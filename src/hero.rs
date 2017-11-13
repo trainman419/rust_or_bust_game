@@ -35,6 +35,7 @@ pub struct Hero {
   velocity: entity::WorldVector2,
   scale: f64,
   width: f64,
+  text: String,
   visible: bool,
   active: bool,
   sprite_id: uuid::Uuid,
@@ -79,6 +80,7 @@ impl Hero {
       velocity: entity::WorldVector2::new(0.0, 0.0),
       scale: actor.scale,
       width: (actor.width as f64) * actor.scale,
+      text: String::from(""),
       visible: true,
       active: true,
       sprite_id: hero_id,
@@ -189,6 +191,14 @@ impl entity::Actor for Hero {
 
   fn set_active(&mut self, active: bool) -> error::Result<()> {
     self.active = active;
+    Ok(())
+  }
+
+  fn text(&self) -> &String {
+    &self.text
+  }
+  fn set_text(&mut self, new_text: String) -> error::Result<()> {
+    self.text = new_text;
     Ok(())
   }
 
