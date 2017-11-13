@@ -67,7 +67,8 @@ impl Hero {
     let mut hero_sprite = sprite::Sprite::from_texture(hero_texture);
 
     hero_sprite.set_position(actor.position.x, actor.position.y);
-    hero_sprite.set_scale(actor.scale, actor.scale);
+    hero_sprite.set_scale(actor.scale * TRANSPARENT_SCALE_FACTOR,
+                          actor.scale * TRANSPARENT_SCALE_FACTOR);
     hero_sprite.set_opacity(TRANSPARENT_OPACITY);
 
     let hero_id: uuid::Uuid = scene.borrow_mut().add_child(hero_sprite);
