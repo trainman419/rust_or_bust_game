@@ -146,6 +146,16 @@ impl Detective {
     }
     false
   }
+
+  pub fn run_away(&mut self) {
+    use entity::Actor;
+    let mut speed = self.speed;
+    if self.direction {
+      speed = -speed;
+    }
+    self.last_obstacle = String::from("");
+    self.set_velocity_x(speed);
+  }
 }
 
 
