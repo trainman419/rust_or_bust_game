@@ -131,7 +131,7 @@ impl Detective {
         }
       },
       level::ActorType::Clue(macguffin) => {
-        if self.last_clue != actor.name() {  
+        if self.last_clue != actor.name() && actor.active() {
           self.last_clue = actor.name();
           self.next_state = DetectiveState::Clue;
           sounds.play(&self.clue_sound);
@@ -248,7 +248,7 @@ impl entity::Actor for Detective {
   }
 
   fn on_update(&mut self, update_args: &piston_window::UpdateArgs) -> error::Result<()> {
-    // motion update if detective is in walking state 
+    // motion update if detective is in walking state
     match self.state {
       DetectiveState::Walk => {
         let velocity = if self.direction {

@@ -100,7 +100,7 @@
       "scale": 10,
       "width": 54,
       "visible": true,
-      "active": true,
+      "active": false,
       "reversible": false
     }
   ]
