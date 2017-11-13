@@ -90,3 +90,16 @@ End Scene/Level - Follow detective to find mass grave of past victims
     Reach mass grave - ghost floats towards it and interacts
     all the ghosts of other victims rise up thanking you for solving the murder
     Everyone passes on together, detective clutches map/hat in resulting breeze
+
+# Asset Attribution
+
+## Sound Effects
+All sound effects were sourced from freesound.org
+
+Background music by FoolBoyMedia -- https://freesound.org/s/256099/ -- License: Attribution Noncommercial
+Car horn by DomainHunter -- https://freesound.org/s/381775/ -- License: Attribution
+Foliage Rustling by duckduckpony -- https://freesound.org/s/204030/ -- License: Attribution
+Stepping on dry leaf by BerduSmith -- https://freesound.org/s/335396/ -- License: Attribution Noncommercial
+Twig snapping by fcsimba -- https://freesound.org/s/114300/ -- License: Creative Commons 0
+Rock Tumble by _stubb -- https://freesound.org/s/389618/ -- License: Creative Commons 0
+Bird flying away by flashdeejay -- https://freesound.org/s/241032/ -- License: Creative Commons 0
