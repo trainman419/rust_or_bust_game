@@ -33,6 +33,7 @@ pub struct State {
   entities: entity::EntityMap,
   hero: Option<hero::HeroRcRef>,
   detective: Option<detective::DetectiveRcRef>,
+  found: bool,
   win: bool,
   title_text: font::FontTransition,
   hint_text: font::FontTransition,
@@ -48,11 +49,17 @@ impl State {
       hero: None,
       detective: None,
       win: false,
-      title_text: font::FontTransition::new("It was a dark and stormy night...",
-                                            "And you've just been murdered in cold blood.",
+      found: false,
+      title_text: font::FontTransition::new(vec![
+                                              String::from("It was a dark and stormy night..."),
+                                              String::from("And you've just been murdered in cold blood."),
+                                              String::from("Go find help."),
+                                            ],
                                             10),
-      hint_text: font::FontTransition::new("Use the arrow keys to haunt around",
-                                           "LShift to materialize, Space to interact",
+      hint_text: font::FontTransition::new(vec![
+                                             String::from("Use the arrow keys to haunt around"),
+                                             String::from("LShift to materialize, Space to interact"),
+                                           ],
                                            15),
     }
   }
@@ -195,8 +202,15 @@ where Window: piston_window::Window,
       }
     }
 
-    if detective.borrow().done() {
+    if detective.borrow().done() && !self.state.found {
       hero.borrow_mut().ascend();
+      self.state.found = true;
+      self.state.title_text = font::FontTransition::new(vec![
+          String::from("The detective found your body!"),
+          String::from("You may finally move on to the afterlife"),
+          String::from("You win! ... ?"),
+        ],
+        4);
     }
 
     if hero.borrow().won() && !self.state.win {
