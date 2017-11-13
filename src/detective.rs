@@ -155,7 +155,7 @@ impl Detective {
     let dir = !self.direction;
     self.set_direction(dir);
     self.next_state = DetectiveState::Walk;
-    self.set_text(String::from("Aaaaah!!!"));
+    self.set_text(String::from("Aaaaah!!!")).expect("Failed setting text");
   }
 
   pub fn set_direction(&mut self, dir: bool) {

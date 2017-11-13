@@ -83,6 +83,6 @@ pub trait Actor {
   fn set_velocity_x(&mut self, x: f64) {
     let mut velocity = self.velocity();
     velocity.x = x;
-    self.set_velocity(velocity);
+    self.set_velocity(velocity).expect("Failed setting velocity");
   }
 }

@@ -5,13 +5,11 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use piston_window::Glyphs;
-use piston_window::PistonWindow;
-use piston_window::WindowSettings;
 
 pub type GlyphsRcRef = Rc<RefCell<piston_window::Glyphs>>;
 
 pub fn load_font<Window>(font_name: String,
-  mut window: &mut piston_window::PistonWindow<Window>,) -> GlyphsRcRef
+  window: &mut piston_window::PistonWindow<Window>,) -> GlyphsRcRef
 where Window: piston_window::Window
 {
     // Load font
