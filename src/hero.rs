@@ -43,6 +43,7 @@ pub struct Hero {
   scale: f64,
   width: f64,
   text: String,
+  text_time: f64,
   visible: bool,
   active: bool,
   sprite_id: uuid::Uuid,
@@ -94,6 +95,7 @@ impl Hero {
       scale: actor.scale,
       width: (actor.width as f64) * actor.scale,
       text: String::from(""),
+      text_time: 0.0,
       visible: true,
       active: true,
       sprite_id: hero_id,
@@ -228,8 +230,9 @@ impl entity::Actor for Hero {
   fn text(&self) -> &String {
     &self.text
   }
-  fn set_text(&mut self, new_text: String) -> error::Result<()> {
+  fn set_text(&mut self, new_text: String, time: f64) -> error::Result<()> {
     self.text = new_text;
+    self.text_time = time;
     Ok(())
   }
 
@@ -281,6 +284,13 @@ impl entity::Actor for Hero {
       if let Some(sprite) = self.scene.borrow_mut().child_mut(self.sprite_id) {
           sprite.set_texture(frame.texture.clone());
       }
+    }
+
+    // Reset text after timeout
+    if self.text_time > 0.0 {
+      self.text_time -= update_args.dt;
+    } else {
+      self.text = String::from("");
     }
 
     Ok(())

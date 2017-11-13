@@ -109,7 +109,7 @@ where Window: piston_window::Window,
         },
         piston_window::Key::LShift => {
           let mut hero = self.state.get_hero();
-          hero.borrow_mut().set_text(String::from("Boo!"))?;
+          hero.borrow_mut().set_text(String::from("Boo!"), 1.0)?;
           hero.borrow_mut().turn_opaque()?;
         },
         piston_window::Key::Space => {
@@ -144,7 +144,6 @@ where Window: piston_window::Window,
         },
         piston_window::Key::LShift => {
           let mut hero = self.state.get_hero();
-          hero.borrow_mut().set_text(String::from(""))?;
           hero.borrow_mut().turn_transparent()?;
         },
         _ => {},

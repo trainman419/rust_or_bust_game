@@ -39,7 +39,7 @@ pub trait Actor {
 
   fn bb(&self) -> graphics::types::Rectangle;
 
-  fn set_text(&mut self, new_text: String) -> error::Result<()>;
+  fn set_text(&mut self, new_text: String, time: f64) -> error::Result<()>;
   fn set_position(&mut self, position: WorldPoint2) -> error::Result<()>;
   fn set_velocity(&mut self, velocity: WorldVector2) -> error::Result<()>;
   fn set_scale(&mut self, scale: f64) -> error::Result<()>;
