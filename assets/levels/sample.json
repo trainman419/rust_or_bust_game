@@ -57,18 +57,6 @@
       "reversible": true
     },
     {
-      "name": "birds",
-      "actor_type": "Obstacle",
-      "image": "objects/cairn/cairn_fall",
-      "sound": "spooked_birds",
-      "position": {"x": 1250, "y": 300},
-      "scale": 10,
-      "width": 10,
-      "visible": true,
-      "active": true,
-      "reversible": false
-    },
-    {
       "name": "cairn",
       "actor_type": "Obstacle",
       "image": "objects/cairn/cairn_fall",
